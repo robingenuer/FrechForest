@@ -54,7 +54,7 @@ predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape
   }
 
   for (t in 1:ncol(object$rf)){
-    pred.feuille[t,] <- pred.FT(object$rf[,t], Curve = Curve,Scalar = Scalar,Factor=Factor,Shape=Shape,Image=Image, timeScale)
+    pred.feuille[t,] <- pred.FT(object$rf[,t], Curve = Curve,Scalar = Scalar,Factor=Factor,Shape=Shape,Image=Image, timeScale = d_out, ...)
   }
 
   if (object$type=="scalar"){
@@ -107,7 +107,7 @@ predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape
       for(k in 1:dim(pred.feuille)[1]){
         pred_courant <- rbind(pred_courant, cbind(rep(k,dim(object$rf[,k]$Y_pred[[pred.feuille[k,l]]])[1]),object$rf[,k]$Y_pred[[pred.feuille[k,l]]]))
       }
-      predouille <- kmlShape::meanFrechet(pred_courant, timeScale = timeScale)
+      predouille <- kmlShape::meanFrechet(pred_courant, timeScale = d_out, ...)
       predouille <- cbind(predouille, rep(Id.pred[l],dim(predouille)[1]))
       pred <- rbind(pred, predouille)
     }

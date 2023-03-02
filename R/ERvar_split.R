@@ -10,7 +10,7 @@
 #' @import emdist
 #'
 #' @keywords internal
-ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
+ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, ...){
 
   impur <- rep(0,dim(X$X)[length(dim(X$X))])
   toutes_imp <- list()
@@ -40,7 +40,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
           split[[i]][which(X$id==l)] <- 1
         }
         # Il faut maintenant regarder la qualite du decoupage ::
-        impurete <- impurity_split(Y,split[[i]])
+        impurete <- impurity_split(Y,split[[i]], ...)
         impur[i] <- impurete$impur
         toutes_imp[[i]] <- impurete$imp_list
       }
@@ -74,15 +74,15 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
         for (l in 1:length(unique(X$id))){
 
           w <- which(X$id==unique(X$id)[l])
-          dg <- distFrechet(X$time[w_gauche],X$X[w_gauche,i],X$time[w],X$X[w,i], timeScale = timeScale)
-          dd <- distFrechet(X$time[w_droit],X$X[w_droit,i],X$time[w],X$X[w,i], timeScale = timeScale)
+          dg <- distFrechet(X$time[w_gauche],X$X[w_gauche,i],X$time[w],X$X[w,i], timeScale = timeScale, ...)
+          dd <- distFrechet(X$time[w_droit],X$X[w_droit,i],X$time[w],X$X[w,i], timeScale = timeScale, ...)
           if (dg<=dd) split_prime[c,l] <- 1
         }
 
         if (length(unique(split_prime[c,]))>1){
           u <- u+1
           qui <- c(qui, c)
-          impurete2[[c]] <- impurity_split(Y,split_prime[c,], timeScale)
+          impurete2[[c]] <- impurity_split(Y,split_prime[c,], timeScale, ...)
           imp <- c(imp,impurete2[[c]]$impur)
         }
 
@@ -129,7 +129,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
             else if (dg[l]<=dd[l]) split_prime[c,l] <- 1
           }
           if (length(split_prime[c,])>1){
-            impurete2 <- impurity_split(Y,split_prime[c,], timeScale)
+            impurete2 <- impurity_split(Y,split_prime[c,], timeScale, ...)
 
             if (impurete2$impur <Imp_shape && is.na(impurete2$impur)==FALSE){
               Imp_shape <- impurete2$impur
@@ -176,7 +176,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
           if (length(unique(split_prime[c,]))>1){
             u <-u+1
             qui <- c(qui,c)
-            impurete2[[c]] <- impurity_split(Y,split_prime[c,], timeScale)
+            impurete2[[c]] <- impurity_split(Y,split_prime[c,], timeScale, ...)
             imp <- c(imp,impurete2[[c]]$impur)
           }
 
@@ -201,7 +201,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
 
       else{
         split[[i]] <- c(1,2)
-        impurete <- impurity_split(Y,split[[i]], timeScale)
+        impurete <- impurity_split(Y,split[[i]], timeScale, ...)
         impur[i] <- impurete$impur
         toutes_imp[[i]] <- impurete$imp_list
       }
@@ -235,7 +235,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1){
           if (length(unique(split_prime[k,]))>1){
             u <- u+1
             qui <- c(qui,k)
-            impurete2[[k]] <- c(impurete2,impurity_split(Y,split_prime[k,], timeScale))
+            impurete2[[k]] <- c(impurete2,impurity_split(Y,split_prime[k,], timeScale), ...)
             imp <- c(imp, impurete2[[k]]$impur)
           }
         }

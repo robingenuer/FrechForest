@@ -5,7 +5,7 @@
 #' @param timeScale
 #'
 #' @keywords internal
-impurity_split <- function(Y,split,timeScale=0.1){
+impurity_split <- function(Y,split,timeScale=0.1, ...){
   impur <- 0
   imp <- list()
   for (i in 1:2){
@@ -16,7 +16,7 @@ impurity_split <- function(Y,split,timeScale=0.1){
       for (j in 1:length(fils)){
         w <- c(w, which(Y$id==fils[j]))
       }
-      imp[[i]] <- impurity(list(type="curve",Y=Y$Y[w],id=Y$id[w],time=Y$time[w]))
+      imp[[i]] <- impurity(list(type="curve",Y=Y$Y[w],id=Y$id[w],time=Y$time[w]), ...)
       impur <- impur + imp[[i]]*prop
     }
 
@@ -25,7 +25,7 @@ impurity_split <- function(Y,split,timeScale=0.1){
       for (j in 1:length(fils)){
         w <- c(w,which(Y$id==fils[j]))
       }
-      imp[[i]] <- impurity(list(type="image", Y=Y$Y[w,], id=Y$id[w]))
+      imp[[i]] <- impurity(list(type="image", Y=Y$Y[w,], id=Y$id[w]), ...)
       impur <- impur + imp[[i]]*prop
     }
 
@@ -34,7 +34,7 @@ impurity_split <- function(Y,split,timeScale=0.1){
       for (j in 1:length(fils)){
         w <- c(w, which(Y$id==fils[j]))
       }
-      if (length(w)>1){imp[[i]] <- impurity(list(type=Y$type,Y=Y$Y[,,w],id=Y$id[w]))
+      if (length(w)>1){imp[[i]] <- impurity(list(type=Y$type,Y=Y$Y[,,w],id=Y$id[w]), ...)
       impur <- impur + imp[[i]]*prop}
       else {imp[[i]] <- 0}
     }
@@ -44,7 +44,7 @@ impurity_split <- function(Y,split,timeScale=0.1){
       for (j in 1:length(fils)){
         w <- c(w, which(Y$id==fils[j]))
       }
-      imp[[i]] <- impurity(list(type=Y$type,Y=Y$Y[w],id=Y$id[w]))
+      imp[[i]] <- impurity(list(type=Y$type,Y=Y$Y[w],id=Y$id[w]), ...)
       impur <- impur + imp[[i]]*prop
     }
 

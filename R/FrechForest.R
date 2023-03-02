@@ -15,23 +15,16 @@
 #' @param nodesize
 #' @param ...
 #'
-#' @import foreach
 #' @import kmlShape
-#' @import doParallel
 #' @import pbapply
 #' @import emdist
 #'
 #' @keywords internal
 rf_shape_para <- function(Curve=NULL, Scalar=NULL, Factor=NULL,Shape=NULL,Image=NULL,Y,mtry,ntree, ncores,ERT=FALSE,ntry=3,nodesize=1,timeScale=0.1, ...){
 
-  cl <- parallel::makeCluster(ncores)
-  doParallel::registerDoParallel(cl)
-
   trees <- pbsapply(1:ntree, FUN=function(i){
     Rtmax(Curve=Curve,Scalar = Scalar,Factor = Factor,Shape=Shape,Image=Image,Y,mtry,ERT=ERT,ntry=ntry,nodesize=nodesize,timeScale=timeScale, ...)
   },cl=cl)
-
-  parallel::stopCluster(cl)
 
   return(trees)
 }
@@ -56,7 +49,7 @@ rf_shape_para <- function(Curve=NULL, Scalar=NULL, Factor=NULL,Shape=NULL,Image=
 #' @param timeScale [numeric]: Allow to modify the time scale, increasing or decreasing the cost of the horizontal shift. If timeScale is very big, then the Frechet mean tends to the Euclidean distance. If timeScale is very small, then it tends to the Dynamic Time Warping. Only used when there are trajectories either in input or output.
 #' @param imp [logical]: TRUE to compute the variables importance FALSE otherwise (default \code{imp=}TRUE)
 #' @param nodesize [numeric]: minimal number of observations in a node.
-#' @param d_out [numeric]: Time scale for the input curves (\code{d_out=0.1} by default).
+#' @param d_out [numeric]: Time scale for the output curves (\code{d_out=0.1} by default).
 #' @param ... : optional parameters to be passed to the low level function
 #'
 #' @import stringr
@@ -76,7 +69,10 @@ rf_shape_para <- function(Curve=NULL, Scalar=NULL, Factor=NULL,Shape=NULL,Image=
 #' }
 #' @export
 #'
-FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y, mtry=NULL, ntree=100,ncores=NULL,ERT=FALSE, timeScale=0.1,ntry=3,nodesize=1, imp=TRUE, d_out=0.1, ...){
+FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
+  Shape = NULL, Image = NULL, Y, mtry = NULL, ntree = 100, ncores = NULL,
+  ERT = FALSE, timeScale = 0.1, ntry = 3, nodesize = 1, imp = TRUE,
+  d_out = 0.1, ...){
 
 
   ### On va regarder les differentes entrees:
@@ -127,7 +123,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
   print("Building the maximal Frechet trees...")
 
   debut <- Sys.time()
-  rf <-  rf_shape_para(Curve=Curve,Scalar=Scalar, Factor=Factor, Shape=Shape, Image=Image,Y=Y, mtry=mtry, ntree=ntree,ERT=ERT,ntry = ntry,timeScale = timeScale,nodesize = nodesize,ncores=ncores)
+  rf <-  rf_shape_para(Curve=Curve,Scalar=Scalar, Factor=Factor, Shape=Shape, Image=Image,Y=Y, mtry=mtry, ntree=ntree,ERT=ERT,ntry = ntry,timeScale = timeScale,nodesize = nodesize,ncores=ncores, ...)
   temps <- Sys.time() - debut
 
   if (Y$type=="shape" || Y$type=="image"){
@@ -145,11 +141,11 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
 
   for (i in 1:ntree){
-    xerror[i] = OOB.tree(rf$rf[,i], Curve=Curve,Scalar=Scalar,Factor = Factor,Shape=Shape,Image=Image, Y=Y, timeScale=timeScale,d_out=d_out)
+    xerror[i] = OOB.tree(rf$rf[,i], Curve=Curve,Scalar=Scalar,Factor = Factor,Shape=Shape,Image=Image, Y=Y, timeScale=timeScale,d_out=d_out, ...)
   }
 
   print("Computing the OOB error of the Frechet forest")
-  oob.err <- OOB.rfshape(rf,Curve = Curve,Scalar =Scalar,Factor=Factor,Shape=Shape,Image=Image,Y=Y, timeScale=timeScale, d_out=d_out)
+  oob.err <- OOB.rfshape(rf,Curve = Curve,Scalar =Scalar,Factor=Factor,Shape=Shape,Image=Image,Y=Y, timeScale=timeScale, d_out=d_out, ...)
 
   # Ok pour le XERROR
 
@@ -158,7 +154,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
     varex = 1 - apply(oob.err$err,2,"mean")/var.ini
   } else {
     var.ini <- impurity(Y, timeScale, aggregationMethod = "hierarchical",
-                        methodHclust = "ward.D2")
+                        methodHclust = "ward.D2", ...)
     varex <- 1 - mean(oob.err$err)/var.ini
   }
 
@@ -201,7 +197,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
           Curve.perm$X[-id_boot_Curve,p] <- permutation_courbes(Curve$X[-id_boot_Curve,p], Curve$id[-id_boot_Curve])
 
 
-          Curve.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve.perm, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale)
+          Curve.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve.perm, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale, d_out=d_out, ...)
 
         }
         Curve.perm$X[,p] <- Curve$X[,p]
@@ -234,7 +230,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
           Scalar.perm$X[-id_boot_Scalar,p] <- sample(Scalar.perm$X[-id_boot_Scalar,p])
 
-          Scalar.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar.perm, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale)
+          Scalar.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar.perm, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale, d_out=d_out, ...)
 
         }
         Scalar.perm$X[,p] <- Scalar$X[,p]
@@ -267,7 +263,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
           Factor.perm$X[-id_boot_Factor,p] <- sample(Factor.perm$X[-id_boot_Factor,p])
 
-          Factor.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar, Factor=Factor.perm ,Shape=Shape, Image=Image, Y, timeScale=timeScale)
+          Factor.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar, Factor=Factor.perm ,Shape=Shape, Image=Image, Y, timeScale=timeScale, d_out = d_out, ...)
 
         }
         ##on remet la variable en place :::
@@ -301,7 +297,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
           Shape.perm$X[,,-id_boot_Shape,p] <- permutation_shapes(Shape.perm$X[,,-id_boot_Shape, p], Shape.perm$id[-id_boot_Shape])
 
-          Shape.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape.perm, Image=Image, Y, timeScale=timeScale)
+          Shape.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape.perm, Image=Image, Y, timeScale=timeScale, d_out = d_out, ...)
 
         }
         ##on remet la variable en place :::
@@ -335,7 +331,7 @@ FrechForest <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
           Image.perm$X[-id_boot_Image,,p] <- Image.perm$X[-id_boot_Image,,p][sample(nboot),]
 
-          Image.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image.perm, Y, timeScale=timeScale)
+          Image.err[k,p] <- OOB.tree(rf$rf[,k], Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image.perm, Y, timeScale=timeScale, d_out = d_out, ...)
 
         }
         ##on remet la variable en place :::

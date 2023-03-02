@@ -158,13 +158,13 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
           if( ERT==FALSE){
             feuille_split_factor = list(Pure = TRUE)
             tryCatch({
-              feuille_split_factor <-  var_split(Factor_courant,Y_courant,timeScale)
+              feuille_split_factor <-  var_split(Factor_courant,Y_courant,timeScale, ...)
             }, error = function(sp){feuille_split_factor = list(Pure = TRUE)})
           }
 
           else{
             feuille_split_factor = list(Pure = TRUE)
-            tryCatch({feuille_split_factor <- ERvar_split(X=Factor_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry)
+            tryCatch({feuille_split_factor <- ERvar_split(X=Factor_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry, ...)
           }, error = function(sp){feuille_split_factor = list(Pure = TRUE)})
           }
 
@@ -177,13 +177,13 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
           if( ERT==FALSE){
             feuille_split_curve = list(Pure = TRUE)
             tryCatch({
-              feuille_split_curve <-  var_split(Curve_courant,Y_courant,timeScale)
+              feuille_split_curve <-  var_split(Curve_courant,Y_courant,timeScale, ...)
             }, error = function(sp){feuille_split_curve = list(Pure = TRUE)})
           }
 
           else{
             feuille_split_curve = list(Pure = TRUE)
-            tryCatch({feuille_split_curve <- ERvar_split(X=Curve_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry)
+            tryCatch({feuille_split_curve <- ERvar_split(X=Curve_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry, ...)
             }, error = function(sp){feuille_split_curve = list(Pure = TRUE)})
           }
 
@@ -197,13 +197,13 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
           if( ERT==FALSE){
             feuille_split_scalar = list(Pure = TRUE)
             tryCatch({
-              feuille_split_scalar <-  var_split(Scalar_courant,Y_courant,timeScale)
+              feuille_split_scalar <-  var_split(Scalar_courant,Y_courant,timeScale, ...)
             }, error = function(sp){feuille_split_scalar = list(Pure = TRUE)})
           }
 
           else{
             feuille_split_scalar = list(Pure = TRUE)
-            tryCatch({feuille_split_scalar <- ERvar_split(X=Scalar_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry)
+            tryCatch({feuille_split_scalar <- ERvar_split(X=Scalar_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry, ...)
             }, error = function(sp){feuille_split_scalar = list(Pure = TRUE)})
           }
 
@@ -217,13 +217,13 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
           if( ERT==FALSE){
             feuille_split_shape = list(Pure = TRUE)
             tryCatch({
-              feuille_split_shape <-  var_split(Shape_courant,Y_courant,timeScale)
+              feuille_split_shape <-  var_split(Shape_courant,Y_courant,timeScale, ...)
             }, error = function(sp){feuille_split_shape = list(Pure = TRUE)})
           }
 
           else{
             feuille_split_shape = list(Pure = TRUE)
-            tryCatch({feuille_split_shape <- ERvar_split(X=Shape_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry)
+            tryCatch({feuille_split_shape <- ERvar_split(X=Shape_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry, ...)
             }, error = function(sp){feuille_split_shape = list(Pure = TRUE)})
           }
 
@@ -236,7 +236,7 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
         if (is.element("image",split.spaces)==TRUE){
 
           feuille_split_image = list(Pure = TRUE)
-          tryCatch({feuille_split_image <- ERvar_split(X=Image_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry)
+          tryCatch({feuille_split_image <- ERvar_split(X=Image_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry, ...)
           }, error = function(sp){feuille_split_image = list(Pure = TRUE)})
 
 
@@ -294,8 +294,8 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
           if (X$type=="curve"){
             trajG <- as.data.frame(cbind(X_boot$id[w_gauche], X_boot$time[w_gauche], X_boot$X[w_gauche,vsplit_space]))
             trajD <- as.data.frame(cbind(X_boot$id[w_droit], X_boot$time[w_droit], X_boot$X[w_droit,vsplit_space]))
-            meanFg <- as.matrix(kmlShape::meanFrechet(trajG))
-            meanFd <- as.matrix(kmlShape::meanFrechet(trajD))
+            meanFg <- as.matrix(kmlShape::meanFrechet(trajG), ...)
+            meanFd <- as.matrix(kmlShape::meanFrechet(trajD), ...)
           }
 
           if (X$type=="shape"){
@@ -339,7 +339,7 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
       for (q in unique(id_feuille)){
         w <- which(id_feuille == q)
         if (Y$type=="curve"){
-          Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y_boot$id[w], Y_boot$time[w], Y_boot$Y[w]))
+          Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y_boot$id[w], Y_boot$time[w], Y_boot$Y[w]), ...)
         }
         if(Y$type=="scalar"){
           Y_pred[[q]]<- mean(Y_boot$Y[w])
@@ -372,7 +372,7 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
   for (q in unique(id_feuille)){
     w <- which(id_feuille == q)
     if (Y$type=="curve"){
-      Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y_boot$id[w], Y_boot$time[w], Y_boot$Y[w]))
+      Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y_boot$id[w], Y_boot$time[w], Y_boot$Y[w]), ...)
     }
 
     if (Y$type=="image"){

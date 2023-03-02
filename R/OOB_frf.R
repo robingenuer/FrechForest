@@ -16,7 +16,7 @@
 #' @import geomorph
 #'
 #' @keywords internal
-OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL, Y, timeScale=0.1, d_out=0.1){
+OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL, Y, timeScale=0.1, d_out=0.1, ...){
 
   ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
@@ -74,16 +74,16 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
             Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
           courbe <- rf$rf[,t]$Y_pred[[pred]]
           pred_courant <- rbind(cbind(rep(t,dim(courbe)[1]),courbe),pred_courant)
         }
       }
-      mean_pred <- meanFrechet(pred_courant, timeScale = d_out)
+      mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
       dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
       names(dp) <- c("x","y")
       oob.pred[[i]] <- dp
-      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out)^2
+      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out, ...)^2
     }
     names(oob.pred) <- as.numeric(unique(Y$id))
     return(list(err=err,oob.pred=oob.pred))
@@ -126,7 +126,7 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
             Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
           pred_courant <- c(pred_courant, pred)
         }
       }
@@ -172,7 +172,7 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
             Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
           pred_courant[t] <- pred
         }
       }
@@ -222,7 +222,7 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
             Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
           pred_courant[,,t] <- rf$rf[,t]$Y_pred[[pred]]
         }
       }
@@ -277,7 +277,7 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
             Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
           pred_courant[t,] <- rf$rf[,t]$Y_pred[[pred]]
         }
       }

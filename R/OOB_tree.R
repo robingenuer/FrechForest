@@ -8,14 +8,14 @@
 #' @param Image [list]: A list that contains the input images.
 #' @param Y [list]: Output.
 #' @param timeScale [numeric]: Time scale for the input  curves (\code{timeScale=0.1} by default)
-#' @param d_out [numeric]: Time scale for the input curves (\code{d_out=0.1} by default)
+#' @param d_out [numeric]: Time scale for the output curves (\code{d_out=0.1} by default)
 #'
 #' @import kmlShape
 #' @import Evomorph
 #' @import stringr
 #'
 #' @export
-OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y, timeScale=0.1, d_out=0.1){
+OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y, timeScale=0.1, d_out=0.1, ...){
 
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
@@ -59,9 +59,9 @@ OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Ima
         id_wXScalar <- which(Scalar$id==i)
         Scalar_courant <- list(type="scalar",X=Scalar$X[id_wXScalar,,drop=FALSE], id=Scalar$id[id_wXScalar])
       }
-      pred_courant <- pred.FT(tree, Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape = Shape_courant,Image=Image_courant, timeScale=timeScale)
+      pred_courant <- pred.FT(tree, Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape = Shape_courant,Image=Image_courant, timeScale=d_out, ...)
       #chancla <- DouglasPeuckerNbPoints(tree$Y_Curves[[pred_courant]]$times, tree$Y_Curves[[pred_courant]]$traj, nbPoints = length(stats::na.omit(Y[id_w])))
-      xerror[which(OOB==i)] <- kmlShape::distFrechet(tree$Y_pred[[pred_courant]]$times, tree$Y_pred[[pred_courant]]$traj, Y$time[id_wY], Y$Y[id_wY], timeScale = d_out)^2
+      xerror[which(OOB==i)] <- kmlShape::distFrechet(tree$Y_pred[[pred_courant]]$times, tree$Y_pred[[pred_courant]]$traj, Y$time[id_wY], Y$Y[id_wY], timeScale = d_out, ...)^2
     }
   }
   else {
@@ -88,7 +88,7 @@ OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Ima
     if (is.element("shape",inputs)==TRUE) Shape_courant  <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
     if (is.element("image",inputs)==TRUE) Image_courant  <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
 
-    pred <- pred.FT(tree,Curve=Curve_courant,Scalar = Scalar_courant,Factor=Factor_courant, Shape=Shape_courant, Image = Image_courant)
+    pred <- pred.FT(tree,Curve=Curve_courant,Scalar = Scalar_courant,Factor=Factor_courant, Shape=Shape_courant, Image = Image_courant, timeScale = d_out, ...)
 
     if (Y$type=="scalar"){xerror <- (Y$Y[w_y]-pred)^2}
     if (Y$type=="factor"){xerror <- 1*(pred!=Y$Y[w_y])}

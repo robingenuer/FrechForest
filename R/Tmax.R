@@ -102,13 +102,13 @@ Tmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y
         decoupe <- 0
 
         if (is.element("curve",inputs)==TRUE){
-          feuille_split_Curve <- var_split(Curve_courant,Y_courant, timeScale)
+          feuille_split_Curve <- var_split(Curve_courant,Y_courant, timeScale, ...)
           F_SPLIT <- rbind(F_SPLIT,c("Curve",feuille_split_Curve$impurete))
           decoupe <- decoupe+1
         }
 
         if (is.element("scalar",inputs)==TRUE){
-          feuille_split_Scalar <- var_split(Scalar_courant,Y_courant,timeScale)
+          feuille_split_Scalar <- var_split(Scalar_courant,Y_courant,timeScale, ...)
           if (feuille_split_Scalar$Pure==FALSE){
             F_SPLIT <- rbind(F_SPLIT,c("Scalar",feuille_split_Scalar$impurete))
             decoupe <- decoupe +1
@@ -116,7 +116,7 @@ Tmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y
         }
 
         if (is.element("factor",inputs)==TRUE){
-          feuille_split_Factor <- var_split(Factor_courant,Y_courant,timeScale)
+          feuille_split_Factor <- var_split(Factor_courant,Y_courant,timeScale, ...)
           if (feuille_split_Factor$Pure==FALSE){
             F_SPLIT <- rbind(F_SPLIT,c("Factor",feuille_split_Factor$impurete))
             decoupe <- decoupe +1
@@ -135,7 +135,7 @@ Tmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y
           #if (imp_apres_split<imp_avant_split){
 
           if (Y$type=="curve"){
-            Y_pred[[unique(id_feuille)[i]]] <- kmlShape::meanFrechet(as.data.frame(cbind(Y$id[w_Y], Y$time[w_Y], Y$Y[w_Y])))}
+            Y_pred[[unique(id_feuille)[i]]] <- kmlShape::meanFrechet(as.data.frame(cbind(Y$id[w_Y], Y$time[w_Y], Y$Y[w_Y])), ...)}
 
           if (Y$type=="scalar"){
             Y_pred[[unique(id_feuille)[i]]] <- mean(Y$Y[w_Y])
@@ -189,8 +189,8 @@ Tmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y
           if (X$type=="curve"){
             trajG <- as.data.frame(cbind(X$id[w_gauche], X$time[w_gauche], X$X[w_gauche,feuille_split$variable]))
             trajD <- as.data.frame(cbind(X$id[w_droit], X$time[w_droit], X$X[w_droit,feuille_split$variable]))
-            meanFg <- as.matrix(kmlShape::meanFrechet(trajG))
-            meanFd <- as.matrix(kmlShape::meanFrechet(trajD))
+            meanFg <- as.matrix(kmlShape::meanFrechet(trajG, ...))
+            meanFd <- as.matrix(kmlShape::meanFrechet(trajD, ...))
           }
 
           if (X$type=="factor"){
@@ -225,7 +225,7 @@ Tmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y
       for (q in unique(id_feuille)){
         w <- which(id_feuille == q)
         if (Y$type=="curve"){
-          Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y$id[w], Y$time[w], Y$Y[w]))
+          Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y$id[w], Y$time[w], Y$Y[w]), ...)
         }
         if(Y$type=="scalar"){
           Y_pred[[q]]<- mean(Y$Y[w])
@@ -257,7 +257,7 @@ Tmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y
   for (q in unique(id_feuille)){
     w <- which(id_feuille == q)
     if (Y$type=="curve"){
-      Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y$id[w], Y$time[w], Y$Y[w]))
+      Y_pred[[q]] <- kmlShape::meanFrechet(data.frame(Y$id[w], Y$time[w], Y$Y[w]), ...)
     }
     if(Y$type=="scalar"){
       Y_pred[[q]]<- mean(Y$Y[w])

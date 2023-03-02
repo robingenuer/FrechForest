@@ -22,7 +22,7 @@ impurity <- function(Y, timeScale=0.1, ...){
     trajLong <- data.frame(id=id,time=time,traj=traj)
     meanF <- meanFrechet(trajLong = trajLong, timeScale = timeScale, ...)
     for (i in unique(id)){
-      imp <- imp + distFrechet(meanF$times, meanF$traj, time[which(id==i)], traj[which(id==i)], timeScale = timeScale)^2
+      imp <- imp + distFrechet(meanF$times, meanF$traj, time[which(id==i)], traj[which(id==i)], timeScale = timeScale, ...)^2
     }
     imp <- imp/length(unique(id))
     return(imp)

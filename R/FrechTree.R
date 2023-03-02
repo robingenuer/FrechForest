@@ -16,7 +16,7 @@
 #'
 #' @export
 #'
-FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncores=NULL){
+FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncores=NULL, ...){
 
   ### Il faut normaliser les elements des formes ::
 
@@ -26,7 +26,7 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncor
     Y$Y <- gpagen(Y$Y,print.progress = FALSE)$coords
   }
 
-  TMAX <- Tmax(Curve=Curve,Scalar = Scalar,Factor=Factor, Shape=NULL,Image=NULL,Y,timeScale = timeScale)
+  TMAX <- Tmax(Curve=Curve,Scalar = Scalar,Factor=Factor, Shape=NULL,Image=NULL,Y,timeScale = timeScale, ...)
 
   if (Y$type=="shape") dime <- dim(Y$Y)[1:2]
 
@@ -123,7 +123,7 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncor
     }
 
 
-    tmax <- Tmax(Curve = Curve.app,Scalar = Scalar.app,Factor = Factor.app,Y=Y.app, timeScale = timeScale)
+    tmax <- Tmax(Curve = Curve.app,Scalar = Scalar.app,Factor = Factor.app,Y=Y.app, timeScale = timeScale, ...)
 
     ELAG <- elagage(tmax)
 
@@ -135,7 +135,7 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncor
 
     for (k in 1:length(beta)){
       sous_arbre <- ELAG[[which.min(abs(pen-beta[k]))]]
-      where <- pred.FT(sous_arbre,Curve = Curve.val,Scalar=Scalar.val,Factor = Factor.val,timeScale = timeScale) #### on doit trouver les feuilles de pr?diction :::
+      where <- pred.FT(sous_arbre,Curve = Curve.val,Scalar=Scalar.val,Factor = Factor.val,timeScale = timeScale, ...) #### on doit trouver les feuilles de pr?diction :::
       ##### il nous faut maintenant pr?dire les diff?rentes courbes ::::
       err_courant <- rep(0, length(where))
 
@@ -143,7 +143,7 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncor
         ww <- which(Y.val$id == unique(Y.val$id)[j])
         #mean_courant <- DouglasPeuckerEpsilon(sous_arbre$Y_curves[[where[j]]][,1],sous_arbre$Y_curves[[where[j]]][,2], 0.01)
         ## On regarde si on a bien une sortie qui est une courbe:
-        if (Y$type=="curve") err_courant[j] <-  kmlShape::distFrechet(Y.val$time[ww], Y.val$Y[ww],sous_arbre$Y_pred[[where[j]]][,1], sous_arbre$Y_pred[[where[j]]][,2])
+        if (Y$type=="curve") err_courant[j] <-  kmlShape::distFrechet(Y.val$time[ww], Y.val$Y[ww],sous_arbre$Y_pred[[where[j]]][,1], sous_arbre$Y_pred[[where[j]]][,2], ...)
         if (Y$type=="scalar") err_courant[j] <- (Y.val$Y[ww]-where[j])^2
         if (Y$type=="factor") err_courant[j] <- 1*(Y.val$Y[ww]==where[j])
         if (Y$type=="image") err_courant[j] <- mean((Y.val[ww,]-sous_arbre$Y_pred[[where[j]]])^2)

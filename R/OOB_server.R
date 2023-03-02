@@ -17,7 +17,7 @@
 #'
 #' @export
 OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,
-                               ncores=NULL,range=NULL, Y, timeScale=0.1, d_out=0.1){
+                               ncores=NULL,range=NULL, Y, timeScale=0.1, d_out=0.1, ...){
 
   ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
@@ -89,7 +89,7 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
             Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+          pred <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
           res <- cbind(rep(t,dim(tree$Y_pred[[pred]])[1]),tree$Y_pred[[pred]])
         }
       }
@@ -97,10 +97,10 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
       parallel::stopCluster(cl)
 
 
-      mean_pred <- meanFrechet(pred_courant, timeScale = d_out)
+      mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
       dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
       names(dp) <- c("x","y")
-      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out)^2
+      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out, ...)^2
     }
   }
 
@@ -148,7 +148,7 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
           }
 
           res <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,
-                          Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+                          Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
         }
       }
 
@@ -206,7 +206,7 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
           }
 
           pred <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,
-                         Shape=Shape_courant,Image=Image_courant, timeScale = timeScale)
+                         Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
 
           res = tree$Y_pred[[pred]]
         }

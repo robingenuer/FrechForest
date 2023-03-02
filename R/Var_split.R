@@ -8,7 +8,7 @@
 #' @import Evomorph
 #'
 #' @keywords internal
-var_split <- function(X ,Y,timeScale=0.1){
+var_split <- function(X ,Y,timeScale=0.1, ...){
   # Pour le moment on se concentre sur le cas des variables courbes ::
   impur <- rep(0,dim(X$X)[length(dim(X$X))])
   toutes_imp <- list()
@@ -31,7 +31,7 @@ var_split <- function(X ,Y,timeScale=0.1){
             split_courant[[k]][which(X$id==l)] <- 1
           }
           # Il faut maintenant regarder la qualite du decoupage ::
-          impurete <- impurity_split(Y,split_courant[[k]])
+          impurete <- impurity_split(Y,split_courant[[k]], ...)
           impur_courant[k] <- impurete$impur
           toutes_imp_courant[[k]] <- impurete$imp_list
         }
@@ -48,10 +48,10 @@ var_split <- function(X ,Y,timeScale=0.1){
 
     if( X$type=="curve"){
       mclds <- kmlShape::cldsWide(ordonne(X$X[,i], X$time, X$id), unique(X$time), unique(X$id))
-      crit <- kmlShape::kmlShape(mclds, nbClusters = 2, timeScale = timeScale, toPlot="none")
+      crit <- kmlShape::kmlShape(mclds, nbClusters = 2, timeScale = timeScale, toPlot="none", ...)
       att <- attributes(crit)
       split[[i]] <- att$clusters
-      impurete <- impurity_split(Y,split[[i]], timeScale)
+      impurete <- impurity_split(Y,split[[i]], timeScale, ...)
       impur[i] <- impurete$impur
       toutes_imp[[i]] <- impurete$imp_list
     }
@@ -60,7 +60,7 @@ var_split <- function(X ,Y,timeScale=0.1){
       if (length(unique(X$X[,i]))>2){
         sp <- kmeans(X$X[,i], centers=2)
         split[[i]] <- sp$cluster
-        impurete <- impurity_split(Y,split[[i]], timeScale)
+        impurete <- impurity_split(Y,split[[i]], timeScale, ...)
         impur[i] <- impurete$impur
         toutes_imp[[i]] <- impurete$imp_list
       }
@@ -68,7 +68,7 @@ var_split <- function(X ,Y,timeScale=0.1){
       if (length(unique(X$X[,i]))==2){
         split[[i]] <- rep(2,length(X$X[,i]))
         split[[i]][which(X$X[,i]==unique(X$X[,i])[1])] <- 1
-        impurete <- impurity_split(Y,split[[i]], timeScale)
+        impurete <- impurity_split(Y,split[[i]], timeScale, ...)
         impur[i] <- impurete$impur
         toutes_imp[[i]] <- impurete$imp_list
       }

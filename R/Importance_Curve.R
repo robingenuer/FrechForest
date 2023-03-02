@@ -13,7 +13,7 @@
 #' @export
 #'
 Importance_Curve <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL,
-                              Image=NULL ,Y, range=NULL,ncores=NULL, timeScale=0.1){
+                              Image=NULL ,Y, range=NULL,ncores=NULL, timeScale=0.1, ...){
 
   if(is.null(ncores)==TRUE){
     ncores <- detectCores()
@@ -49,8 +49,8 @@ Importance_Curve <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL,
       Curve.perm$X[-id_boot_Curve,range[p]] <- permutation_courbes(Curve$X[-id_boot_Curve,range[p]], Curve$id[-id_boot_Curve])
 
 
-      res <- OOB.tree(tree, Curve=Curve.perm, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale)-
-        OOB.tree(tree, Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale)
+      res <- OOB.tree(tree, Curve=Curve.perm, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale, ...)-
+        OOB.tree(tree, Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale, ...)
     }
     parallel::stopCluster(cl)
     imp[p] <- mean(Curve.err)

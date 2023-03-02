@@ -13,7 +13,7 @@
 #' @export
 #'
 Importance_Factor <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL,
-                              Image=NULL ,Y, range=NULL,ncores=NULL, timeScale=0.1){
+                              Image=NULL ,Y, range=NULL,ncores=NULL, timeScale=0.1, ...){
 
   if(is.null(ncores)==TRUE){
     ncores <- detectCores()
@@ -49,8 +49,8 @@ Importance_Factor <- function(Curve=NULL,Scalar=NULL, Factor=NULL, Shape=NULL,
       Factor.perm$X[-id_boot_Factor,range[p]] <- sample(Factor.perm$X[-id_boot_Factor,range[p]])
 
 
-      res <- OOB.tree(tree, Curve=Curve, Scalar = Scalar, Factor=Factor.perm,Shape=Shape, Image=Image, Y, timeScale=timeScale)-
-        OOB.tree(tree, Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale)
+      res <- OOB.tree(tree, Curve=Curve, Scalar = Scalar, Factor=Factor.perm,Shape=Shape, Image=Image, Y, timeScale=timeScale, ...)-
+        OOB.tree(tree, Curve=Curve, Scalar = Scalar, Factor=Factor,Shape=Shape, Image=Image, Y, timeScale=timeScale, ...)
     }
     parallel::stopCluster(cl)
     imp[p] <- mean(Factor.err)
