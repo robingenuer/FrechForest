@@ -85,6 +85,7 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
       oob.pred[[i]] <- dp
       err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out)^2
     }
+    names(oob.pred) <- as.numeric(unique(Y$id))
     return(list(err=err,oob.pred=oob.pred))
   }
 

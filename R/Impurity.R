@@ -12,7 +12,7 @@
 #'
 #'
 #' @keywords internal
-impurity <- function(Y, timeScale=0.1){
+impurity <- function(Y, timeScale=0.1, ...){
 
   if (Y$type=="curve"){
     traj <- Y$Y
@@ -20,7 +20,7 @@ impurity <- function(Y, timeScale=0.1){
     time <- Y$time
     imp <- 0
     trajLong <- data.frame(id=id,time=time,traj=traj)
-    meanF <- meanFrechet(trajLong = trajLong, timeScale = timeScale)
+    meanF <- meanFrechet(trajLong = trajLong, timeScale = timeScale, ...)
     for (i in unique(id)){
       imp <- imp + distFrechet(meanF$times, meanF$traj, time[which(id==i)], traj[which(id==i)], timeScale = timeScale)^2
     }
