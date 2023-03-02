@@ -11,7 +11,8 @@ pred.FT(
   Factor = NULL,
   Shape = NULL,
   Image = NULL,
-  timeScale = 0.1
+  timeScale = 0.1,
+  ...
 )
 }
 \arguments{

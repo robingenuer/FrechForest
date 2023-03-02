@@ -4,7 +4,7 @@
 \alias{impurity}
 \title{Impurity}
 \usage{
-impurity(Y, timeScale = 0.1)
+impurity(Y, timeScale = 0.1, ...)
 }
 \arguments{
 \item{timeScale}{}

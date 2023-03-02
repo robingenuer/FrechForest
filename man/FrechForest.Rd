@@ -52,7 +52,7 @@ FrechForest(
 
 \item{imp}{[logical]: TRUE to compute the variables importance FALSE otherwise (default \code{imp=}TRUE)}
 
-\item{d_out}{[numeric]: Time scale for the input curves (\code{d_out=0.1} by default).}
+\item{d_out}{[numeric]: Time scale for the output curves (\code{d_out=0.1} by default).}
 
 \item{...}{: optional parameters to be passed to the low level function}
 }

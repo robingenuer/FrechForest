@@ -10,7 +10,8 @@ FrechetTree(
   Factor = NULL,
   Y,
   timeScale = 0.1,
-  ncores = NULL
+  ncores = NULL,
+  ...
 )
 }
 \arguments{

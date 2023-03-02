@@ -13,7 +13,8 @@ OOB.rfshape(
   Image = NULL,
   Y,
   timeScale = 0.1,
-  d_out = 0.1
+  d_out = 0.1,
+  ...
 )
 }
 \arguments{

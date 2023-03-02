@@ -13,7 +13,8 @@ OOB.tree(
   Image = NULL,
   Y,
   timeScale = 0.1,
-  d_out = 0.1
+  d_out = 0.1,
+  ...
 )
 }
 \arguments{
@@ -33,7 +34,7 @@ OOB.tree(
 
 \item{timeScale}{[numeric]: Time scale for the input  curves (\code{timeScale=0.1} by default)}
 
-\item{d_out}{[numeric]: Time scale for the input curves (\code{d_out=0.1} by default)}
+\item{d_out}{[numeric]: Time scale for the output curves (\code{d_out=0.1} by default)}
 }
 \description{
 OOB tree

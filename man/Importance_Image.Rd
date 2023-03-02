@@ -13,7 +13,8 @@ Importance_Image(
   Y,
   range = NULL,
   ncores = NULL,
-  timeScale = 0.1
+  timeScale = 0.1,
+  ...
 )
 }
 \arguments{

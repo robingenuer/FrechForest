@@ -4,7 +4,7 @@
 \alias{var_split}
 \title{Classical Variable Split function}
 \usage{
-var_split(X, Y, timeScale = 0.1)
+var_split(X, Y, timeScale = 0.1, ...)
 }
 \arguments{
 \item{timeScale}{}

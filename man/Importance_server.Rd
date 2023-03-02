@@ -16,7 +16,8 @@ Importance_server(
   range = NULL,
   ncores = NULL,
   timeScale = 0.1,
-  xerror
+  xerror,
+  ...
 )
 }
 \arguments{
