@@ -15,7 +15,9 @@
 #' @import stringr
 #'
 #' @export
-OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL ,Y, timeScale=0.1, d_out=0.1, ...){
+OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
+                     Image=NULL ,Y, timeScale=0.1, d_out=0.1,
+                     FrechetSumOrMax = "max", ...){
 
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
@@ -61,7 +63,7 @@ OOB.tree <- function(tree, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Ima
       }
       pred_courant <- pred.FT(tree, Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape = Shape_courant,Image=Image_courant, timeScale=d_out, ...)
       #chancla <- DouglasPeuckerNbPoints(tree$Y_Curves[[pred_courant]]$times, tree$Y_Curves[[pred_courant]]$traj, nbPoints = length(stats::na.omit(Y[id_w])))
-      xerror[which(OOB==i)] <- kmlShape::distFrechet(tree$Y_pred[[pred_courant]]$times, tree$Y_pred[[pred_courant]]$traj, Y$time[id_wY], Y$Y[id_wY], timeScale = d_out, ...)^2
+      xerror[which(OOB==i)] <- kmlShape::distFrechet(tree$Y_pred[[pred_courant]]$times, tree$Y_pred[[pred_courant]]$traj, Y$time[id_wY], Y$Y[id_wY], timeScale = d_out, FrechetSumOrMax = FrechetSumOrMax)^2
     }
   }
   else {

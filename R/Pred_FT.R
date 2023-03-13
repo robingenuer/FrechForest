@@ -16,7 +16,8 @@
 #'
 #' @export
 #'
-pred.FT <- function(tree, Curve=NULL,Scalar=NULL,Factor=NULL,Shape=NULL,Image=NULL ,timeScale=0.1, ...){
+pred.FT <- function(tree, Curve=NULL,Scalar=NULL,Factor=NULL,Shape=NULL,
+                    Image=NULL ,timeScale=0.1, FrechetSumOrMax = "max", ...){
 
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
@@ -56,8 +57,8 @@ pred.FT <- function(tree, Curve=NULL,Scalar=NULL,Factor=NULL,Shape=NULL,Image=NU
       meanD <- tree$hist_nodes[[2*noeud_courant+1]]
 
       if (type=="curve"){
-        distG <- distFrechet(meanG[,1], meanG[,2], X$time[wCurve], X$X[wCurve,var.split], timeScale = timeScale, ...)
-        distD <- distFrechet(meanD[,1], meanD[,2], X$time[wCurve], X$X[wCurve,var.split], timeScale = timeScale, ...)
+        distG <- distFrechet(meanG[,1], meanG[,2], X$time[wCurve], X$X[wCurve,var.split], timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
+        distD <- distFrechet(meanD[,1], meanD[,2], X$time[wCurve], X$X[wCurve,var.split], timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
       }
       if (type=="scalar"){
         distG <- abs(meanG- X$X[wScalar,var.split])

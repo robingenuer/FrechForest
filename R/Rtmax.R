@@ -183,7 +183,9 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
 
           else{
             feuille_split_curve = list(Pure = TRUE)
-            tryCatch({feuille_split_curve <- ERvar_split(X=Curve_courant,Y=Y_courant,timeScale=timeScale,ntry = ntry, ...)
+            tryCatch({
+              feuille_split_curve <- ERvar_split(X=Curve_courant,Y=Y_courant,
+                timeScale=timeScale,ntry = ntry, ...)
             }, error = function(sp){feuille_split_curve = list(Pure = TRUE)})
           }
 
@@ -292,8 +294,12 @@ Rtmax <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,Y
           #print(paste("Split on the variable", vsplit_space, "on the space of ", paste(TYPE,"s",sep="")))
 
           if (X$type=="curve"){
-            trajG <- as.data.frame(cbind(X_boot$id[w_gauche], X_boot$time[w_gauche], X_boot$X[w_gauche,vsplit_space]))
-            trajD <- as.data.frame(cbind(X_boot$id[w_droit], X_boot$time[w_droit], X_boot$X[w_droit,vsplit_space]))
+            trajG <- as.data.frame(
+              cbind(X_boot$id[w_gauche], X_boot$time[w_gauche],
+                    X_boot$X[w_gauche,vsplit_space]))
+            trajD <- as.data.frame(
+              cbind(X_boot$id[w_droit], X_boot$time[w_droit],
+                    X_boot$X[w_droit,vsplit_space]))
             meanFg <- as.matrix(kmlShape::meanFrechet(trajG), ...)
             meanFd <- as.matrix(kmlShape::meanFrechet(trajD), ...)
           }

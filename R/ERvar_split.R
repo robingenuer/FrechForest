@@ -10,7 +10,7 @@
 #' @import emdist
 #'
 #' @keywords internal
-ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, ...){
+ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...){
 
   impur <- rep(0,dim(X$X)[length(dim(X$X))])
   toutes_imp <- list()
@@ -74,8 +74,10 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, ...){
         for (l in 1:length(unique(X$id))){
 
           w <- which(X$id==unique(X$id)[l])
-          dg <- distFrechet(X$time[w_gauche],X$X[w_gauche,i],X$time[w],X$X[w,i], timeScale = timeScale, ...)
-          dd <- distFrechet(X$time[w_droit],X$X[w_droit,i],X$time[w],X$X[w,i], timeScale = timeScale, ...)
+          dg <- distFrechet(X$time[w_gauche],X$X[w_gauche,i],X$time[w],X$X[w,i],
+                            timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
+          dd <- distFrechet(X$time[w_droit],X$X[w_droit,i],X$time[w],X$X[w,i],
+                            timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
           if (dg<=dd) split_prime[c,l] <- 1
         }
 

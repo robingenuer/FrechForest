@@ -16,7 +16,9 @@
 #' @import geomorph
 #'
 #' @keywords internal
-OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL, Y, timeScale=0.1, d_out=0.1, ...){
+OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
+                        Image=NULL, Y, timeScale=0.1, d_out=0.1,
+                        FrechetSumOrMax = "max", ...){
 
   ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
@@ -83,7 +85,8 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Im
       dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
       names(dp) <- c("x","y")
       oob.pred[[i]] <- dp
-      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out, ...)^2
+      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
+                            FrechetSumOrMax = FrechetSumOrMax)^2
     }
     names(oob.pred) <- as.numeric(unique(Y$id))
     return(list(err=err,oob.pred=oob.pred))

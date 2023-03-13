@@ -16,7 +16,8 @@
 #'
 #' @export
 #'
-FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncores=NULL, ...){
+FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1,
+                        ncores=NULL, FrechetSumOrMax = "max", ...){
 
   ### Il faut normaliser les elements des formes ::
 
@@ -143,7 +144,7 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1, ncor
         ww <- which(Y.val$id == unique(Y.val$id)[j])
         #mean_courant <- DouglasPeuckerEpsilon(sous_arbre$Y_curves[[where[j]]][,1],sous_arbre$Y_curves[[where[j]]][,2], 0.01)
         ## On regarde si on a bien une sortie qui est une courbe:
-        if (Y$type=="curve") err_courant[j] <-  kmlShape::distFrechet(Y.val$time[ww], Y.val$Y[ww],sous_arbre$Y_pred[[where[j]]][,1], sous_arbre$Y_pred[[where[j]]][,2], ...)
+        if (Y$type=="curve") err_courant[j] <-  kmlShape::distFrechet(Y.val$time[ww], Y.val$Y[ww],sous_arbre$Y_pred[[where[j]]][,1], sous_arbre$Y_pred[[where[j]]][,2], FrechetSumOrMax = FrechetSumOrMax)
         if (Y$type=="scalar") err_courant[j] <- (Y.val$Y[ww]-where[j])^2
         if (Y$type=="factor") err_courant[j] <- 1*(Y.val$Y[ww]==where[j])
         if (Y$type=="image") err_courant[j] <- mean((Y.val[ww,]-sous_arbre$Y_pred[[where[j]]])^2)

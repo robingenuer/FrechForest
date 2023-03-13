@@ -17,7 +17,8 @@
 #'
 #' @export
 OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,
-                               ncores=NULL,range=NULL, Y, timeScale=0.1, d_out=0.1, ...){
+                       ncores=NULL,range=NULL, Y, timeScale=0.1, d_out=0.1,
+                       FrechetSumOrMax = FrechetSumOrMax, ...){
 
   ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
@@ -100,7 +101,8 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
       mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
       dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
       names(dp) <- c("x","y")
-      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out, ...)^2
+      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
+                            FrechetSumOrMax = FrechetSumOrMax)^2
     }
   }
 

@@ -48,7 +48,8 @@ var_split <- function(X ,Y,timeScale=0.1, ...){
 
     if( X$type=="curve"){
       mclds <- kmlShape::cldsWide(ordonne(X$X[,i], X$time, X$id), unique(X$time), unique(X$id))
-      crit <- kmlShape::kmlShape(mclds, nbClusters = 2, timeScale = timeScale, toPlot="none", ...)
+      crit <- kmlShape::kmlShape(mclds, nbClusters = 2, timeScale = timeScale,
+                                 toPlot="none")
       att <- attributes(crit)
       split[[i]] <- att$clusters
       impurete <- impurity_split(Y,split[[i]], timeScale, ...)

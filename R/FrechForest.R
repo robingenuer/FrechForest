@@ -128,7 +128,11 @@ FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
   print("Building the maximal Frechet trees...")
 
   debut <- Sys.time()
-  rf <-  rf_shape_para(Curve=Curve,Scalar=Scalar, Factor=Factor, Shape=Shape, Image=Image,Y=Y, mtry=mtry, ntree=ntree,ERT=ERT,ntry = ntry,timeScale = timeScale,nodesize = nodesize,ncores=ncores, ...)
+  rf <-  rf_shape_para(
+    Curve = Curve, Scalar = Scalar, Factor = Factor, Shape = Shape,
+    Image = Image, Y = Y, mtry = mtry, ntree = ntree, ERT = ERT, ntry = ntry,
+    timeScale = timeScale, nodesize = nodesize, ncores = ncores, ...
+  )
   temps <- Sys.time() - debut
 
   if (Y$type=="shape" || Y$type=="image"){
@@ -158,9 +162,9 @@ FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
     var.ini = apply(Y$Y,2,"var")
     varex = 1 - apply(oob.err$err,2,"mean")/var.ini
   } else {
-    # var.ini <- impurity(Y, timeScale, aggregationMethod = "hierarchical",
-    #                     methodHclust = "ward.D2", ...)
-    var.ini <- impurity(Y, timeScale, ...)
+    var.ini <- impurity(Y, timeScale, aggregationMethod = "hierarchical",
+                        methodHclust = "ward.D2", ...)
+    # var.ini <- impurity(Y, timeScale, ...)
     varex <- 1 - mean(oob.err$err)/var.ini
   }
 
