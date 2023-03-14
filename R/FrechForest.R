@@ -162,9 +162,9 @@ FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
     var.ini = apply(Y$Y,2,"var")
     varex = 1 - apply(oob.err$err,2,"mean")/var.ini
   } else {
-    var.ini <- impurity(Y, timeScale, aggregationMethod = "hierarchical",
-                        methodHclust = "ward.D2", ...)
-    # var.ini <- impurity(Y, timeScale, ...)
+    # var.ini <- impurity(Y, timeScale, aggregationMethod = "hierarchical",
+                        # methodHclust = "ward.D2", ...)
+    var.ini <- impurity(Y, timeScale, ...)
     varex <- 1 - mean(oob.err$err)/var.ini
   }
 
