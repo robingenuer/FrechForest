@@ -14,6 +14,8 @@ OOB.rfshape(
   Y,
   timeScale = 0.1,
   d_out = 0.1,
+  FrechetSumOrMax = "max",
+  ncores,
   ...
 )
 }

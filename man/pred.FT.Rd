@@ -12,6 +12,7 @@ pred.FT(
   Shape = NULL,
   Image = NULL,
   timeScale = 0.1,
+  FrechetSumOrMax = "max",
   ...
 )
 }

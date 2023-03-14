@@ -10,25 +10,21 @@
 #' @param timeScale
 #' @param d_out
 #'
-#' @import stringr
-#' @import kmlShape
-#' @import Evomorph
-#' @import geomorph
-#'
 #' @keywords internal
-OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
-                        Image=NULL, Y, timeScale=0.1, d_out=0.1,
-                        FrechetSumOrMax = "max", ...){
+OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
+  Shape = NULL, Image = NULL, Y, timeScale = 0.1, d_out = 0.1,
+  FrechetSumOrMax = "max", ncores, ...){
+
+  cl <- parallel::makeCluster(ncores)
+  doParallel::registerDoParallel(cl)
 
   ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
 
-
   for (k in 1:length(Inputs)){
     str_sub(Inputs[k],1,1) <- str_to_upper(str_sub(Inputs[k],1,1))
   }
-
 
   err <- rep(NA,length(unique(Y$id)))
 
@@ -40,56 +36,69 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
 
   if (Y$type=="curve"){
     oob.pred <- list()
-    #errdp <- rep(NA,length(unique(id)))
 
     for (i in 1:length(unique(Y$id))){
       indiv <- unique(Y$id)[i]
       w_y <- which(Y$id==indiv)
-      pred_courant <- NULL
-      for (t in 1:ncol(rf$rf)){
+
+      pred_courant <- pblapply(1:ncol(rf$rf), FUN = function(t){
         BOOT <- rf$rf[,t]$boot
         oob <- setdiff(unique(Y$id),BOOT)
         if (is.element(indiv, oob)== TRUE){
 
           if (is.element("curve",inputs)==TRUE){
             w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+            Curve_courant <- list(
+              type="curve", X=Curve$X[w_XCurve,, drop=FALSE],
+              id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs)==TRUE){
             w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+            Scalar_courant <- list(
+              type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE],
+              id=Scalar$id[w_XScalar])
           }
 
           if (is.element("factor",inputs)==TRUE){
             w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+            Factor_courant <- list(
+              type="factor", X=Factor$X[w_XFactor,, drop=FALSE],
+              id=Factor$id[w_XFactor])
           }
 
           if (is.element("shape",inputs)==TRUE){
             w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+            Shape_courant <- list(
+              type="shape", X=Shape$X[,,w_XShape,, drop=FALSE],
+              id=Shape$id[w_XShape])
           }
 
           if (is.element("image",inputs)==TRUE){
             w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+            Image_courant <- list(
+              type="image", X=Image$X[w_XImage,,, drop=FALSE],
+              id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
+                          Factor=Factor_courant,Shape=Shape_courant,
+                          Image=Image_courant, timeScale = d_out, ...)
           courbe <- rf$rf[,t]$Y_pred[[pred]]
-          pred_courant <- rbind(cbind(rep(t,dim(courbe)[1]),courbe),pred_courant)
+          return(cbind(rep(t,dim(courbe)[1]),courbe))
         }
-      }
+      }, cl = cl)
+      pred_courant <- Reduce(rbind, pred_courant)
       mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
-      dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
+      dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj,
+                                            Y$time[w_y]))
       names(dp) <- c("x","y")
       oob.pred[[i]] <- dp
-      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
-                            FrechetSumOrMax = FrechetSumOrMax)^2
+      err[i] <- distFrechet(
+        dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
+        FrechetSumOrMax = FrechetSumOrMax)^2
     }
     names(oob.pred) <- as.numeric(unique(Y$id))
-    return(list(err=err,oob.pred=oob.pred))
   }
 
   if (Y$type=="scalar"){
@@ -111,25 +120,35 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
 
           if (is.element("scalar",inputs)==TRUE){
             w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+            Scalar_courant <- list(
+              type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE],
+              id=Scalar$id[w_XScalar])
           }
 
           if (is.element("factor",inputs)==TRUE){
             w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+            Factor_courant <- list(
+              type="factor", X=Factor$X[w_XFactor,, drop=FALSE],
+              id=Factor$id[w_XFactor])
           }
 
           if (is.element("shape",inputs)==TRUE){
             w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+            Shape_courant <- list(
+              type="shape", X=Shape$X[,,w_XShape,, drop=FALSE],
+              id=Shape$id[w_XShape])
           }
 
           if (is.element("image",inputs)==TRUE){
             w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+            Image_courant <- list(
+              type="image", X=Image$X[w_XImage,,, drop=FALSE],
+              id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
+                          Factor=Factor_courant,Shape=Shape_courant,
+                          Image=Image_courant, timeScale = d_out, ...)
           pred_courant <- c(pred_courant, pred)
         }
       }
@@ -152,12 +171,16 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
 
           if (is.element("curve",inputs)==TRUE){
             w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+            Curve_courant <- list(
+              type="curve", X=Curve$X[w_XCurve,, drop=FALSE],
+              id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs)==TRUE){
             w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+            Scalar_courant <- list(
+              type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE],
+              id=Scalar$id[w_XScalar])
           }
 
           if (is.element("factor",inputs)==TRUE){
@@ -167,15 +190,21 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
 
           if (is.element("shape",inputs)==TRUE){
             w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+            Shape_courant <- list(
+              type="shape", X=Shape$X[,,w_XShape,, drop=FALSE],
+              id=Shape$id[w_XShape])
           }
 
           if (is.element("image",inputs)==TRUE){
             w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+            Image_courant <- list(
+              type="image", X=Image$X[w_XImage,,, drop=FALSE],
+              id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
+                          Factor=Factor_courant,Shape=Shape_courant,
+                          Image=Image_courant, timeScale = d_out, ...)
           pred_courant[t] <- pred
         }
       }
@@ -202,30 +231,42 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
 
           if (is.element("curve",inputs)==TRUE){
             w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+            Curve_courant <- list(
+              type="curve", X=Curve$X[w_XCurve,, drop=FALSE],
+              id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs)==TRUE){
             w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+            Scalar_courant <- list(
+              type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE],
+              id=Scalar$id[w_XScalar])
           }
 
           if (is.element("factor",inputs)==TRUE){
             w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+            Factor_courant <- list(
+              type="factor", X=Factor$X[w_XFactor,, drop=FALSE],
+              id=Factor$id[w_XFactor])
           }
 
           if (is.element("shape",inputs)==TRUE){
             w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+            Shape_courant <- list(
+              type="shape", X=Shape$X[,,w_XShape,, drop=FALSE],
+              id=Shape$id[w_XShape])
           }
 
           if (is.element("image",inputs)==TRUE){
             w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+            Image_courant <- list(
+              type="image", X=Image$X[w_XImage,,, drop=FALSE],
+              id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
+                          Factor=Factor_courant,Shape=Shape_courant,
+                          Image=Image_courant, timeScale = d_out, ...)
           pred_courant[,,t] <- rf$rf[,t]$Y_pred[[pred]]
         }
       }
@@ -238,7 +279,6 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
 
       oob.pred[,,i] <- M
     }
-    return(list(err=err,oob.pred=oob.pred))
   }
 
   if (Y$type=="image"){
@@ -257,37 +297,50 @@ OOB.rfshape <- function(rf, Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
           selection <- c(selection, t)
           if (is.element("curve",inputs)==TRUE){
             w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+            Curve_courant <- list(
+              type="curve", X=Curve$X[w_XCurve,, drop=FALSE],
+              id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs)==TRUE){
             w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+            Scalar_courant <- list(
+              type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE],
+              id=Scalar$id[w_XScalar])
           }
 
           if (is.element("factor",inputs)==TRUE){
             w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+            Factor_courant <- list(
+              type="factor", X=Factor$X[w_XFactor,, drop=FALSE],
+              id=Factor$id[w_XFactor])
           }
 
           if (is.element("shape",inputs)==TRUE){
             w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+            Shape_courant <- list(
+              type="shape", X=Shape$X[,,w_XShape,, drop=FALSE],
+              id=Shape$id[w_XShape])
           }
 
           if (is.element("image",inputs)==TRUE){
             w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+            Image_courant <- list(
+              type="image", X=Image$X[w_XImage,,, drop=FALSE],
+              id=Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
+                          Factor=Factor_courant,Shape=Shape_courant,
+                          Image=Image_courant, timeScale = d_out, ...)
           pred_courant[t,] <- rf$rf[,t]$Y_pred[[pred]]
         }
       }
       oob.pred[i,] <-  apply(na.omit(pred_courant),2,"mean")
       err[i,] <- (oob.pred[i,]-Y$Y[w_y,])^2
     }
-    return(list(err=err,oob.pred=oob.pred))
   }
+
+  parallel::stopCluster(cl)
   return(list(err=err,oob.pred=oob.pred))
 }

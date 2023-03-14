@@ -11,6 +11,7 @@ FrechetTree(
   Y,
   timeScale = 0.1,
   ncores = NULL,
+  FrechetSumOrMax = "max",
   ...
 )
 }
