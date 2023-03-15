@@ -39,7 +39,7 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
     for (i in 1:length(unique(Y$id))){
       indiv <- unique(Y$id)[i]
-      w_y <- which(Y$id==indiv)
+      w_y <- which(Y$id == indiv)
 
       pred_courant <- foreach::foreach(
         t = 1:ncol(rf$rf), .packages = "kmlShape" , .combine = "rbind") %dopar% {
@@ -50,48 +50,50 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
           if (is.element("curve",inputs) == TRUE){
             w_XCurve <- which(Curve$id == indiv)
             Curve_courant <- list(
-              type="curve", X=Curve$X[w_XCurve, , drop=FALSE],
-              id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+              type = "curve", X = Curve$X[w_XCurve, , drop=FALSE],
+              id = Curve$id[w_XCurve], time = Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs) == TRUE){
             w_XScalar <- which(Scalar$id == indiv)
             Scalar_courant <- list(
-              type="scalar", X=Scalar$X[w_XScalar, , drop=FALSE],
-              id=Scalar$id[w_XScalar])
+              type = "scalar", X = Scalar$X[w_XScalar, , drop=FALSE],
+              id = Scalar$id[w_XScalar])
           }
 
           if (is.element("factor",inputs) == TRUE){
             w_XFactor <- which(Factor$id == indiv)
             Factor_courant <- list(
-              type="factor", X=Factor$X[w_XFactor, , drop=FALSE],
-              id=Factor$id[w_XFactor])
+              type = "factor", X = Factor$X[w_XFactor, , drop=FALSE],
+              id = Factor$id[w_XFactor])
           }
 
           if (is.element("shape",inputs) == TRUE){
             w_XShape <- which(Shape$id == indiv)
             Shape_courant <- list(
-              type="shape", X=Shape$X[ , , w_XShape, , drop=FALSE],
-              id=Shape$id[w_XShape])
+              type = "shape", X = Shape$X[ , , w_XShape, , drop=FALSE],
+              id = Shape$id[w_XShape])
           }
 
           if (is.element("image",inputs) == TRUE){
             w_XImage <- which(Image$id == indiv)
             Image_courant <- list(
-              type="image", X=Image$X[w_XImage, , , drop=FALSE],
-              id=Image$id[w_XImage])
+              type = "image", X = Image$X[w_XImage, , , drop=FALSE],
+              id = Image$id[w_XImage])
           }
 
-          pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
-                          Factor=Factor_courant,Shape=Shape_courant,
-                          Image=Image_courant, timeScale = d_out, ...)
-          courbe <- rf$rf[,t]$Y_pred[[pred]]
+          pred <- pred.FT(
+            rf$rf[, t], Curve = Curve_courant, Scalar = Scalar_courant,
+            Factor = Factor_courant, Shape = Shape_courant,
+            Image = Image_courant, timeScale = d_out, ...)
+          courbe <- rf$rf[, t]$Y_pred[[pred]]
         }
-        res <- cbind(rep(t,dim(courbe)[1]),courbe)
-      }
+        res <- cbind(rep(t, dim(courbe)[1]), courbe)
+        }
+
       mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
-      dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj,
-                                            Y$time[w_y]))
+      dp <- as.data.frame(
+        Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
       names(dp) <- c("x","y")
       oob.pred[[i]] <- dp
       err[i] <- distFrechet(

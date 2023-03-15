@@ -167,7 +167,7 @@ FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
     varTot <- apply(Y$Y, 2, "var")
     pseudoR2 <- 1 - apply(oob.err$err, 2, "mean") / varTot
   } else {
-    varTot <- impurity(Y, timeScale, ...)
+    varTot <- impurity(Y = Y, timeScale = d_out, ...)
     pseudoR2 <- 1 - mean(oob.err$err) / varTot
   }
 
