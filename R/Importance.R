@@ -10,12 +10,12 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
   cl <- parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl)
+
   oobTrees <- pbsapply(1:ntree, FUN = function(numTree){
     OOB.tree(rf$rf[, numTree], Curve = Curve, Scalar = Scalar,
              Factor = Factor, Shape = Shape, Image = Image, Y = Y,
              timeScale = timeScale, d_out = d_out, ...)
   }, cl = cl)
-  parallel::stopCluster(cl)
 
   Curve.perm <- Curve
   Scalar.perm <- Scalar
@@ -34,9 +34,6 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
     p=1
     print('Computing the importance on the space of curves')
     Curve.err <- matrix(NA, ntree, dim(Curve$X)[2])
-
-    cl <- parallel::makeCluster(ncores)
-    doParallel::registerDoParallel(cl)
 
     Importance.Curve <- foreach::foreach(
       p = 1:dim(Curve$X)[2], .packages = "kmlShape" ,.combine = "c") %dopar% {
@@ -64,8 +61,6 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
         Curve.perm$X[,p] <- Curve$X[,p]
         res <- mean(Curve.err[,p]- oobTrees)
       }
-
-    parallel::stopCluster(cl)
   }
 
 
@@ -73,9 +68,6 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
     p=1
     print('Computing the importance on the space of scalars')
     Scalar.err <- matrix(NA, ntree, dim(Scalar$X)[2])
-
-    cl <- parallel::makeCluster(ncores)
-    doParallel::registerDoParallel(cl)
 
     Importance.Scalar <- foreach::foreach(
       p = 1:dim(Scalar$X)[2], .packages = "kmlShape" ,
@@ -102,17 +94,12 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
         Scalar.perm$X[,p] <- Scalar$X[,p]
         res <- mean(Scalar.err[,p]- oobTrees)
       }
-
-    parallel::stopCluster(cl)
   }
 
   if (is.element("factor",inputs)==TRUE){
     p=1
     print('Computing the importance on the space of factors')
     Factor.err <- matrix(NA, ntree, dim(Factor$X)[2])
-
-    cl <- parallel::makeCluster(ncores)
-    doParallel::registerDoParallel(cl)
 
     Importance.Factor <- foreach::foreach(
       p = 1:dim(Factor$X)[2], .packages = "kmlShape" ,
@@ -142,17 +129,12 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
         Factor.perm$X[,p] <- Factor$X[,p]
         res <- mean(Factor.err[,p]- oobTrees)
       }
-
-    parallel::stopCluster(cl)
   }
 
   if (is.element("shape",inputs)==TRUE){
     p=1
     print('Computing the importance on the space of shapes')
     Shape.err <- matrix(NA, ntree, dim(Shape$X)[length(dim(Shape$X))])
-
-    cl <- parallel::makeCluster(ncores)
-    doParallel::registerDoParallel(cl)
 
     Importance.Shape <- foreach::foreach(
       p = 1:dim(Shape$X)[length(dim(Shape$X))], .packages = "kmlShape",
@@ -182,17 +164,12 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
         Shape.perm$X[,,,p] <- Shape$X[,,,p]
         res <- mean(Shape.err[,p]- oobTrees)
       }
-
-    parallel::stopCluster(cl)
   }
 
   if (is.element("image",inputs)==TRUE){
     p=1
     print('Computing the importance on the space of images')
     Image.err <- matrix(NA, ntree, dim(Image$X)[3])
-
-    cl <- parallel::makeCluster(ncores)
-    doParallel::registerDoParallel(cl)
 
     Importance.Image <- foreach::foreach(
       p = 1:dim(Image$X)[3], .packages = "kmlShape", .combine = "c") %dopar% {
@@ -221,9 +198,9 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
         Image.perm$X[,,p] <- Image$X[,,p]
         res <- mean(Image.err[,p]- oobTrees)
       }
-
-    parallel::stopCluster(cl)
   }
+
+  parallel::stopCluster(cl)
 
   varImp <- list(
     Curve = as.vector(Importance.Curve),
