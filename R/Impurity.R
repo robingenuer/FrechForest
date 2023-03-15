@@ -5,16 +5,16 @@
 #' @inheritParams FrechForest
 #'
 #' @keywords internal
-impurity <- function(Y, timeScale = 0.1, FrechetSumOrMax = "max", ...){
+impurity <- function(Y, d_out = 0.1, FrechetSumOrMax = "max", ...){
 
   if (Y$type=="curve"){
     trajLong <- data.frame(id = Y$id, time = Y$time, traj = Y$Y)
-    meanF <- meanFrechet(trajLong = trajLong, timeScale = timeScale,
+    meanF <- meanFrechet(trajLong = trajLong, timeScale = d_out,
                          FrechetSumOrMax = FrechetSumOrMax, ...)
     allDistF <- sapply(unique(Y$id), FUN = function(i) {
       distF <- distFrechet(
         meanF$times, meanF$traj, Y$time[which(Y$id == i)], Y$Y[which(Y$id == i)],
-        timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)^2
+        timeScale = d_out, FrechetSumOrMax = FrechetSumOrMax)^2
       return(distF)
     })
     imp <- mean(allDistF)

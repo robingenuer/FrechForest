@@ -5,7 +5,7 @@
 #' @inheritParams FrechForest
 #'
 #' @keywords internal
-impurity_split <- function(Y,split,timeScale=0.1, ...){
+impurity_split <- function(Y, split, d_out = 0.1, ...){
   impur <- 0
   imp <- list()
   for (i in 1:2){

@@ -20,14 +20,13 @@ pred.FT <- function(tree, Curve = NULL, Scalar = NULL, Factor = NULL,
 
   id.pred <- unique(get(Inputs[1])$id)
 
-
   if (tree$Y$type=="factor"){
-    pred <- factor(rep(NA, length(id.pred)),levels=tree$Ylevels)
+    pred <- factor(rep(NA, length(id.pred)), levels = tree$Ylevels)
+  } else {
+    pred <- rep(NA, length(id.pred))
   }
 
-  else{pred <- rep(NA,length(id.pred))}
-
-  for (i in 1:length(id.pred)){
+  for (i in 1:length(id.pred)) {
 
     if (is.element("curve",inputs)==TRUE) wCurve <-
         which(Curve$id == id.pred[i])
@@ -42,7 +41,7 @@ pred.FT <- function(tree, Curve = NULL, Scalar = NULL, Factor = NULL,
 
     noeud_courant <- 1
 
-    while (is.element(noeud_courant, tree$feuilles)==FALSE){
+    while (is.element(noeud_courant, tree$feuilles)==FALSE) {
 
       X <- get(as.character(tree$V_split[
         which(tree$V_split[,2] == noeud_courant), 1]))
@@ -83,21 +82,19 @@ pred.FT <- function(tree, Curve = NULL, Scalar = NULL, Factor = NULL,
         distD <- -1*(is.element(X$X[wFactor,var.split],meanD))
       }
 
-      if (is.nan(distG) || is.nan(distD)) {
-        noeud_courant <- 2*noeud_courant + sample(c(0,1),1) }
-      else if (distG <= distD) { noeud_courant <- 2*noeud_courant}
-      else if (distD < distG) {noeud_courant <- 2*noeud_courant +1}
-
-
+      noeud_courant <-
+        ifelse(is.nan(distG) || is.nan(distD),
+               2 * noeud_courant + sample(c(0,1), 1),
+               ifelse(distG <= distD, 2*noeud_courant, 2*noeud_courant +1)
+        )
     }
 
     if(tree$Y$type=="curve" || tree$Y$type=="image" || tree$Y$type=="shape"){
       pred[i] <- noeud_courant
-    }
-
-    else{
+    } else {
       pred[i] <- tree$Y_pred[[noeud_courant]]
     }
   }
+
   return(pred)
 }

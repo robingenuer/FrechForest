@@ -5,7 +5,8 @@
 #' @inheritParams pred.FT
 #'
 #' @keywords internal
-ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...){
+ERvar_split <- function(X, Y, ntry = 3, timeScale = 0.1, d_out = 0.1,
+  FrechetSumOrMax = "max", ...){
 
   impur <- rep(0,dim(X$X)[length(dim(X$X))])
   toutes_imp <- list()
@@ -62,24 +63,25 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...)
       imp <- NULL
 
       for (c in 1:ntry){
-
         w_gauche <- which(X$id==id_centers[c,1])
         w_droit <- which(X$id==id_centers[c,2])
 
         for (l in 1:length(unique(X$id))){
-
           w <- which(X$id==unique(X$id)[l])
-          dg <- distFrechet(X$time[w_gauche],X$X[w_gauche,i],X$time[w],X$X[w,i],
-                            timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
-          dd <- distFrechet(X$time[w_droit],X$X[w_droit,i],X$time[w],X$X[w,i],
-                            timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
+          dg <- distFrechet(
+            X$time[w_gauche],X$X[w_gauche,i],X$time[w],X$X[w,i],
+            timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
+          dd <- distFrechet(
+            X$time[w_droit],X$X[w_droit,i],X$time[w],X$X[w,i],
+            timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)
           if (dg<=dd) split_prime[c,l] <- 1
         }
 
         if (length(unique(split_prime[c,]))>1){
-          u <- u+1
+          u <- u + 1
           qui <- c(qui, c)
-          impurete2[[c]] <- impurity_split(Y,split_prime[c,], timeScale, ...)
+          impurete2[[c]] <- impurity_split(
+            Y, split_prime[c,], d_out = d_out, ...)
           imp <- c(imp,impurete2[[c]]$impur)
         }
 
@@ -126,7 +128,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...)
             else if (dg[l]<=dd[l]) split_prime[c,l] <- 1
           }
           if (length(split_prime[c,])>1){
-            impurete2 <- impurity_split(Y,split_prime[c,], timeScale, ...)
+            impurete2 <- impurity_split(Y, split_prime[c,], d_out = d_out, ...)
 
             if (impurete2$impur <Imp_shape && is.na(impurete2$impur)==FALSE){
               Imp_shape <- impurete2$impur
@@ -173,13 +175,11 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...)
           if (length(unique(split_prime[c,]))>1){
             u <-u+1
             qui <- c(qui,c)
-            impurete2[[c]] <- impurity_split(Y,split_prime[c,], timeScale, ...)
+            impurete2[[c]] <- impurity_split(
+              Y, split_prime[c,], d_out = d_out, ...)
             imp <- c(imp,impurete2[[c]]$impur)
           }
-
         }
-
-
 
         if (u>0){
           gagnant <- qui[which.min(imp)]
@@ -198,7 +198,7 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...)
 
       else{
         split[[i]] <- c(1,2)
-        impurete <- impurity_split(Y,split[[i]], timeScale, ...)
+        impurete <- impurity_split(Y, split[[i]], d_out = d_out, ...)
         impur[i] <- impurete$impur
         toutes_imp[[i]] <- impurete$imp_list
       }
@@ -220,7 +220,9 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...)
 
         for (l in 1:length(X$X[,i])){
           for (k in 1:ntry){
-            if (abs(centers[k,1]-X$X[l,i])<= abs(centers[k,2]-X$X[l,i])) split_prime[k,l] <- 1
+            if (abs(centers[k,1]-X$X[l,i])<= abs(centers[k,2]-X$X[l,i])) {
+              split_prime[k,l] <- 1
+            }
           }
         }
 
@@ -232,7 +234,8 @@ ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...)
           if (length(unique(split_prime[k,]))>1){
             u <- u+1
             qui <- c(qui,k)
-            impurete2[[k]] <- c(impurete2,impurity_split(Y,split_prime[k,], timeScale), ...)
+            impurete2[[k]] <- c(
+              impurete2, impurity_split(Y, split_prime[k,], d_out = d_out, ...))
             imp <- c(imp, impurete2[[k]]$impur)
           }
         }

@@ -4,7 +4,7 @@
 \alias{var_split}
 \title{Classical Variable Split function}
 \usage{
-var_split(X, Y, timeScale = 0.1, ...)
+var_split(X, Y, timeScale = 0.1, d_out = 0.1, ...)
 }
 \arguments{
 \item{X}{}
@@ -21,6 +21,9 @@ decreasing the cost of the horizontal shift. If timeScale is very big, then
 the Frechet mean tends to the Euclidean distance. If timeScale is very
 small, then it tends to the Dynamic Time Warping. Only used when there are
 trajectories either in input or output.}
+
+\item{d_out}{[numeric]: Time scale for the output curves (\code{d_out=0.1} by
+default).}
 
 \item{...}{: optional parameters to be passed to the low level function}
 }

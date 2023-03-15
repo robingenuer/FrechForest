@@ -16,7 +16,7 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   oobTrees <- pbsapply(1:ntree, FUN = function(numTree){
     OOB.tree(rf$rf[, numTree], Curve = Curve, Scalar = Scalar,
              Factor = Factor, Shape = Shape, Image = Image, Y = Y,
-             timeScale = timeScale, d_out = d_out, ...)
+             timeScale = timeScale, d_out = d_out)
   }, cl = cl)
 
   Curve.perm <- Curve
@@ -31,40 +31,34 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   Importance.Shape <- NULL
   Importance.Image <- NULL
 
-  #X.perm <- list(type=X$type, X=X$X, id=X$id, time=X$time)
-  if (is.element("curve",inputs)==TRUE){
-    p=1
+  if (is.element("curve", inputs) == TRUE) {
     print('Computing the importance on the space of curves')
     Curve.err <- matrix(NA, ntree, dim(Curve$X)[2])
 
     Importance.Curve <- foreach::foreach(
-      p = 1:dim(Curve$X)[2], .packages = "kmlShape" ,.combine = "c") %dopar% {
-        for (k in 1:ntree){
-          BOOT <- rf$rf[,k]$boot
-          nboot <- length(unique(Y$id))- length(BOOT)
+      p = 1:dim(Curve$X)[2], .packages = "kmlShape", .combine = "c") %dopar% {
+      for (k in 1:ntree) {
+        BOOT <- rf$rf[, k]$boot
+        nboot <- length(unique(Y$id)) - length(BOOT)
 
-          id_boot_Curve <- NULL
-          for (i in 1:length(BOOT)){
-            id_boot_Curve <- c(id_boot_Curve, which(Curve$id==BOOT[i]))
-          }
-
-          # Il faut maintenant faire la permutation :
-
-          Curve.perm$X[-id_boot_Curve,p] <- permutation_courbes(
-            Curve$X[-id_boot_Curve,p], Curve$id[-id_boot_Curve])
-
-
-          Curve.err[k,p] <- OOB.tree(
-            rf$rf[,k], Curve = Curve.perm, Scalar = Scalar, Factor = Factor,
-            Shape = Shape, Image = Image, Y = Y, timeScale = timeScale,
-            d_out=d_out, ...)
-
+        id_boot_Curve <- NULL
+        for (i in 1:length(BOOT)) {
+          id_boot_Curve <- c(id_boot_Curve, which(Curve$id == BOOT[i]))
         }
-        Curve.perm$X[,p] <- Curve$X[,p]
-        res <- mean(Curve.err[,p]- oobTrees)
-      }
-  }
 
+        Curve.perm$X[-id_boot_Curve, p] <- permutation_courbes(
+          Curve$X[-id_boot_Curve, p], Curve$id[-id_boot_Curve])
+
+        Curve.err[k, p] <- OOB.tree(
+          rf$rf[, k], Curve = Curve.perm, Scalar = Scalar, Factor = Factor,
+          Shape = Shape, Image = Image, Y = Y, timeScale = timeScale,
+          d_out = d_out, ...)
+
+        Curve.perm$X[, p] <- Curve$X[, p]
+      }
+      res <- mean(Curve.err[, p] - oobTrees)
+    }
+  }
 
   if (is.element("scalar",inputs)==TRUE){
     p=1
