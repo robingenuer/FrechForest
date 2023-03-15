@@ -1,13 +1,8 @@
 #' Extremely randomized split
 #'
-#' @param X
-#' @param Y
-#' @param timeScale
-#' @param ntry
-#'
-#' @import kmlShape
-#' @import Evomorph
-#' @import emdist
+#' @param X Inputs data
+#' @inheritParams FrechForest
+#' @inheritParams pred.FT
 #'
 #' @keywords internal
 ERvar_split <- function(X ,Y,ntry=3,timeScale=0.1, FrechetSumOrMax = "max", ...){

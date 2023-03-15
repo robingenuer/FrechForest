@@ -7,7 +7,7 @@
 noeuds_deg(tree)
 }
 \arguments{
-\item{tree}{}
+\item{tree}{Input tree}
 }
 \description{
 Detect and destroy nodes

@@ -1,11 +1,8 @@
 #' Classical Variable Split function
 #'
 #' @param X
-#' @param Y
-#' @param timeScale
 #'
-#' @import kmlShape
-#' @import Evomorph
+#' @inheritParams FrechForest
 #'
 #' @keywords internal
 var_split <- function(X ,Y,timeScale=0.1, ...){
@@ -59,7 +56,7 @@ var_split <- function(X ,Y,timeScale=0.1, ...){
 
     if(X$type=="scalar"){
       if (length(unique(X$X[,i]))>2){
-        sp <- kmeans(X$X[,i], centers=2)
+        sp <- stats::kmeans(X$X[,i], centers=2)
         split[[i]] <- sp$cluster
         impurete <- impurity_split(Y,split[[i]], timeScale, ...)
         impur[i] <- impurete$impur

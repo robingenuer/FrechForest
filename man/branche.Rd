@@ -7,7 +7,9 @@
 branche(tree, t)
 }
 \arguments{
-\item{t}{}
+\item{tree}{Input tree}
+
+\item{t}{Node}
 }
 \description{
 Sub trees  extractor

@@ -1,3 +1,5 @@
+#' @inheritParams FrechForest
+#'
 #' @keywords internal
 rf_shape_para <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
   Shape = NULL, Image = NULL, Y , mtry, ntree, ncores, ERT = FALSE, ntry = 3,

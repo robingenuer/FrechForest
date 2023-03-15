@@ -1,18 +1,7 @@
 #' General Frechet Tree
 #'
-#' @param Curve [list]:
-#' @param Scalar [list]:
-#' @param Factor [list]:
-#' @param Y [list]:
-#' @param timeScale [numeric]:
-#' @param ncores [numeric]:
-#'
-#' @import foreach
-#' @import doParallel
-#' @import parallel
-#' @import kmlShape
-#' @import Evomorph
-#' @import pbapply
+#' @inheritParams FrechForest
+#' @inheritParams pred.FT
 #'
 #' @export
 #'

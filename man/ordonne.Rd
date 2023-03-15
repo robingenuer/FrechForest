@@ -7,7 +7,11 @@
 ordonne(X, time, id)
 }
 \arguments{
-\item{id}{}
+\item{X}{Input}
+
+\item{time}{Time values}
+
+\item{id}{Identifiers vector}
 }
 \description{
 Ordonne

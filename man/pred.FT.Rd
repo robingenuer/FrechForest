@@ -19,17 +19,47 @@ pred.FT(
 \arguments{
 \item{tree}{: Frechet tree.}
 
-\item{Curve}{[list]: A list that contains the input curves.}
+\item{Curve}{[list]: A list that contains the different input curves. It must
+contain the following elements (no choice): \code{X} the matrix of the
+different curves, each column code for a different curve variable;
+\code{id} is the vector of the identifiers for the different trajectories
+contained in \code{X}; \code{time} is the vector of the measurement times
+associated with the trajectories contained in \code{X}.}
 
-\item{Scalar}{[list]: A list that contains the input scalars.}
+\item{Scalar}{[list]: A list that contains the different input scalars. It
+must contain the following elements (no choice):  \code{X} the matrix of
+the scalars, each column code for a different variable; \code{id} is the
+vector of the identifiers for each individual.}
 
-\item{Factor}{[list]: A list that contains the input factors.}
+\item{Factor}{[list]: A list that contains the different input factors. It
+must contain the following elements (no choice):  \code{X} the matrix of
+the factors, each column code for a different variable; \code{id} is the
+vector of the identifiers for each individual.}
 
-\item{Shape}{[list]: A list that contains the input shape.}
+\item{Shape}{[list]: A list that contains the different input shapes. It must
+contain the following elements (no choice):  \code{X} the array of the
+shapes of dimension \code{n}x2x\code{l}x\code{p} where \code{n} is the
+number of points for composing each shape, \code{l} is the number of shapes
+and \code{p} is the number of shapes variables, \code{id} is the vector of
+the identifiers for each individual.}
 
-\item{Image}{[list]: A list that contains the input images.}
+\item{Image}{[list]: A list that contains the different input images. It must
+contain the following elements (no choice):  \code{X} the array of the
+images of dimension \code{n}x\code{m}x\code{l}x\code{p} where
+\code{n}*\code{m} is the size of each image, \code{l} is the number of
+images and \code{p} is the number of shapes variables; \code{id} is the
+vector of the identifiers for each individual.}
 
-\item{timeScale}{[numeric]: Time scale for the input and output curves (\code{timeScale=0.1} by default)}
+\item{timeScale}{[numeric]: Allow to modify the time scale, increasing or
+decreasing the cost of the horizontal shift. If timeScale is very big, then
+the Frechet mean tends to the Euclidean distance. If timeScale is very
+small, then it tends to the Dynamic Time Warping. Only used when there are
+trajectories either in input or output.}
+
+\item{FrechetSumOrMax}{Frechet Mean and Frechet Distance can be define using
+the 'sum' function or the 'max' function.}
+
+\item{...}{: optional parameters to be passed to the low level function}
 }
 \description{
 Predict Frechet tree

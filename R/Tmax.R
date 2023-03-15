@@ -1,18 +1,6 @@
 #' Maximal Frechet tree
 #'
-#' @param Curve [list]:
-#' @param Scalar [list]:
-#' @param Factor [list]:
-#' @param Shape [list]:
-#' @param Image [list]:
-#' @param Y [list]:
-#' @param timeScale [list]:
-#' @param ... : Optional parameters
-#'
-#' @import kmlShape
-#' @import stringr
-#' @import Evomorph
-#' @import geomorph
+#' @inheritParams FrechForest
 #'
 #' @keywords internal
 #'

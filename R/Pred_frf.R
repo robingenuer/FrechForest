@@ -1,24 +1,15 @@
 #' Predict with Frechet random forests
 #'
 #' @param object : Frechet random forest
-#' @param Curve [list]:
-#' @param Scalar [list]:
-#' @param Factor [list]:
-#' @param Shape [list]:
-#' @param Image [list]:
-#' @param timeScale [numeric]:
-#' @param d_out [numeric]:
-#' @param ... : optional parameters to be passed to the low level function
 #'
-#' @import kmlShape
-#' @import stringr
-#' @import Evomorph
-#' @import geomorph
+#' @inheritParams FrechForest
 #'
 #' @export
 #'
-predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape=NULL, Image=NULL, timeScale=0.1, d_out=0.1,...){
-  # La première etape est de toujours lire les predicteurs ::
+predict.FrechForest <- function(object, Curve = NULL, Scalar = NULL,
+  Factor = NULL, Shape = NULL, Image = NULL, timeScale = 0.1, d_out = 0.1,
+  ...) {
+    # La première etape est de toujours lire les predicteurs ::
 
   if (is.null(Curve)==FALSE){
     Curve <- list(type="curve",X=Curve$X,id=Curve$id,time=Curve$time)
@@ -40,7 +31,8 @@ predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape
 
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
-  # On va les lires en mettant la maj sur les differents elements qui le constituent :
+  # On va les lires en mettant la maj sur les differents elements qui le
+  # constituent :
 
   for (k in 1:length(Inputs)){
     str_sub(Inputs[k],1,1) <- str_to_upper(str_sub(Inputs[k],1,1))
@@ -54,7 +46,9 @@ predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape
   }
 
   for (t in 1:ncol(object$rf)){
-    pred.feuille[t,] <- pred.FT(object$rf[,t], Curve = Curve,Scalar = Scalar,Factor=Factor,Shape=Shape,Image=Image, timeScale = d_out, ...)
+    pred.feuille[t,] <- pred.FT(
+      object$rf[,t], Curve = Curve, Scalar = Scalar, Factor = Factor,
+      Shape = Shape, Image = Image, timeScale = timeScale, ...)
   }
 
   if (object$type=="scalar"){
@@ -77,7 +71,8 @@ predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape
   if (object$type=="shape"){
     pred <- array(0, dim=c(object$size[1], object$size[2],length(Id.pred)))
     for (l in 1:dim(pred.feuille)[2]){
-      pred_courant <- array(0,dim=c(object$size[1],object$size[2],ncol(object$rf)))
+      pred_courant <- array(
+        0,dim=c(object$size[1],object$size[2],ncol(object$rf)))
       for(k in 1:dim(pred.feuille)[1]){
         pred_courant[,,k] <- object$rf[,k]$Y_pred[[pred.feuille[k,l]]]
       }
@@ -105,7 +100,11 @@ predict.FrechForest <- function(object, Curve=NULL,Scalar=NULL,Factor=NULL,Shape
     for (l in 1:dim(pred.feuille)[2]){
       pred_courant <- NULL
       for(k in 1:dim(pred.feuille)[1]){
-        pred_courant <- rbind(pred_courant, cbind(rep(k,dim(object$rf[,k]$Y_pred[[pred.feuille[k,l]]])[1]),object$rf[,k]$Y_pred[[pred.feuille[k,l]]]))
+        pred_courant <- rbind(
+          pred_courant,
+          cbind(rep(k, dim(object$rf[, k]$Y_pred[[pred.feuille[k, l]]])[1]),
+            object$rf[, k]$Y_pred[[pred.feuille[k, l]]])
+          )
       }
       predouille <- kmlShape::meanFrechet(pred_courant, timeScale = d_out, ...)
       predouille <- cbind(predouille, rep(Id.pred[l],dim(predouille)[1]))

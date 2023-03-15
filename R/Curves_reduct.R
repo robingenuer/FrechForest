@@ -1,8 +1,8 @@
 #' Title
 #'
-#' @param time.init
-#' @param traj.init
-#' @param time.new
+#' @param time.init Initial time values of the trajectory
+#' @param traj.init Initial trajectory values
+#' @param time.new New times values for the output trajectory
 #'
 #' @keywords internal
 Curve.reduc.times <- function(time.init , traj.init, time.new){

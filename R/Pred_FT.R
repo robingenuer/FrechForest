@@ -1,18 +1,15 @@
 #' Predict Frechet tree
 #'
 #' @param tree : Frechet tree.
-#' @param Curve [list]: A list that contains the input curves.
-#' @param Scalar [list]: A list that contains the input scalars.
-#' @param Factor [list]: A list that contains the input factors.
-#' @param Shape [list]: A list that contains the input shape.
-#' @param Image [list]: A list that contains the input images.
-#' @param timeScale [numeric]: Time scale for the input and output curves (\code{timeScale=0.1} by default)
+#' @param FrechetSumOrMax Frechet Mean and Frechet Distance can be define using
+#'   the 'sum' function or the 'max' function.
 #'
+#' @inheritParams FrechForest
 #'
 #' @export
 #'
-pred.FT <- function(tree, Curve=NULL,Scalar=NULL,Factor=NULL,Shape=NULL,
-                    Image=NULL ,timeScale=0.1, FrechetSumOrMax = "max", ...){
+pred.FT <- function(tree, Curve = NULL, Scalar = NULL, Factor = NULL,
+  Shape = NULL, Image = NULL , timeScale = 0.1, FrechetSumOrMax = "max", ...) {
 
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
@@ -53,8 +50,6 @@ pred.FT <- function(tree, Curve=NULL,Scalar=NULL,Factor=NULL,Shape=NULL,
         which(tree$V_split[,2] == noeud_courant), 1]))
       var.split <- as.numeric(as.character(tree$V_split[
         which(tree$V_split[,2] == noeud_courant), 3]))
-
-      # Maintenant il nous faut regarder la difference entre la moyenne à gauche et a droite et conclure :
 
       meanG <- tree$hist_nodes[[2*noeud_courant]]
       meanD <- tree$hist_nodes[[2*noeud_courant+1]]

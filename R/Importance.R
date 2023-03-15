@@ -1,3 +1,5 @@
+#' @inheritParams FrechForest
+#' @inheritParams OOB.rfshape
 #' @keywords internal
 Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
                        Shape = NULL, Image = NULL, Y, ncores = NULL,

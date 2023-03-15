@@ -7,7 +7,9 @@
 permutation_shapes(Shapes, id)
 }
 \arguments{
-\item{id}{}
+\item{Shapes}{Input Shapes to be permuted}
+
+\item{id}{Identifiers of individuals}
 }
 \description{
 Title

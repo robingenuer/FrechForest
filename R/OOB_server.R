@@ -1,26 +1,17 @@
 #' OOB for random Forest
 #'
-#' @param Curve [list]:
-#' @param Scalar [list]:
-#' @param Factor [list]:
-#' @param Shape [list]:
-#' @param Image [list]:
-#' @param Y [list]:
-#' @param timeScale [numeric]
-#' @param d_out [numeric]
 #' @param range [vector]:
-#' @param ncores [numeric]:
 #'
-#' @import stringr
-#' @import kmlShape
-#' @import emdist
+#' @inheritParams FrechForest
+#' @inheritParams pred.FT
 #'
 #' @export
-OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=NULL,
-                       ncores=NULL,range=NULL, Y, timeScale=0.1, d_out=0.1,
-                       FrechetSumOrMax = FrechetSumOrMax, ...){
+OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL,
+  Image=NULL, ncores=NULL,range=NULL, Y, timeScale=0.1, d_out=0.1,
+  FrechetSumOrMax = FrechetSumOrMax, ...){
 
-  ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
+  ### Pour optimiser le code il faudra virer cette ligne et ne le calculer
+  # qu'une seule fois !
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
   Inputs <- inputs
 
@@ -34,7 +25,6 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
   for (k in 1:length(Inputs)){
     str_sub(Inputs[k],1,1) <- str_to_upper(str_sub(Inputs[k],1,1))
   }
-
 
   err <- rep(NA,length(unique(Y$id)))
 
@@ -57,8 +47,8 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
       cl <- parallel::makeCluster(ncores)
       doParallel::registerDoParallel(cl)
 
-      pred_courant <- foreach::foreach(t = 1:ntree,.packages = "kmlShape" ,.combine = "rbind") %dopar% {
-
+      pred_courant <- foreach::foreach(
+        t = 1:ntree, .packages = "kmlShape", .combine = "rbind") %dopar% {
 
         tree = get(load(trees[t]))
         BOOT <- tree$boot
@@ -66,8 +56,10 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
         if (is.element(indiv, oob)== TRUE){
 
           if (is.element("curve",inputs)==TRUE){
-            w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+            w_XCurve <- which(Curve$id == indiv)
+            Curve_courant <- list(
+              type = "curve", X = Curve$X[w_XCurve, , drop = FALSE],
+              id = Curve$id[w_XCurve], time = Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs)==TRUE){
@@ -76,33 +68,43 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
           }
 
           if (is.element("factor",inputs)==TRUE){
-            w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+            w_XFactor <- which(Factor$id == indiv)
+            Factor_courant <- list(
+              type = "factor", X = Factor$X[w_XFactor, , drop = FALSE],
+              id = Factor$id[w_XFactor])
           }
 
-          if (is.element("shape",inputs)==TRUE){
-            w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+          if (is.element("shape", inputs)==TRUE) {
+            w_XShape <- which(Shape$id == indiv)
+            Shape_courant <- list(
+              type = "shape", X = Shape$X[, , w_XShape, , drop = FALSE],
+              id = Shape$id[w_XShape])
           }
 
-          if (is.element("image",inputs)==TRUE){
-            w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+          if (is.element("image", inputs)==TRUE) {
+            w_XImage <- which(Image$id == indiv)
+            Image_courant <- list(
+              type = "image", X = Image$X[w_XImage, , , drop = FALSE],
+              id = Image$id[w_XImage])
           }
 
-          pred <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
-          res <- cbind(rep(t,dim(tree$Y_pred[[pred]])[1]),tree$Y_pred[[pred]])
+          pred <- pred.FT(
+            tree, Curve = Curve_courant, Scalar = Scalar_courant,
+            Factor = Factor_courant,Shape = Shape_courant,
+            Image = Image_courant, timeScale = timeScale, ...)
+          res <- cbind(rep(t, dim(tree$Y_pred[[pred]])[1]), tree$Y_pred[[pred]])
         }
       }
 
       parallel::stopCluster(cl)
 
-
       mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
-      dp <- as.data.frame(Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
-      names(dp) <- c("x","y")
-      err[i] <- distFrechet(dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
-                            FrechetSumOrMax = FrechetSumOrMax)^2
+      dp <- as.data.frame(
+        Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
+      names(dp) <- c("x", "y")
+      err[i] <- distFrechet(
+        dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
+        FrechetSumOrMax = FrechetSumOrMax)^2
     }
   }
 
@@ -116,7 +118,8 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
       cl <- parallel::makeCluster(ncores)
       doParallel::registerDoParallel(cl)
 
-      pred_courant <- foreach::foreach(t = 1:ntree,.packages = "kmlShape" ,.combine = "c") %dopar% {
+      pred_courant <- foreach::foreach(
+        t = 1:ntree, .packages = "kmlShape", .combine = "c") %dopar% {
 
         tree = get(load(trees[t]))
         BOOT <- tree$boot
@@ -124,33 +127,43 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
         if (is.element(indiv, oob)== TRUE){
 
-          if (is.element("curve",inputs)==TRUE){
+          if (is.element("curve", inputs)==TRUE){
             w_XCurve <- which(Curve$id== indiv)
             Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
           }
 
-          if (is.element("scalar",inputs)==TRUE){
+          if (is.element("scalar", inputs)==TRUE){
             w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+            Scalar_courant <- list(
+              type = "scalar", X = Scalar$X[w_XScalar, , drop = FALSE],
+              id = Scalar$id[w_XScalar])
           }
 
-          if (is.element("factor",inputs)==TRUE){
-            w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+          if (is.element("factor", inputs)==TRUE) {
+            w_XFactor <- which(Factor$id == indiv)
+            Factor_courant <- list(
+              type = "factor", X = Factor$X[w_XFactor, , drop = FALSE],
+              id = Factor$id[w_XFactor])
           }
 
-          if (is.element("shape",inputs)==TRUE){
-            w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+          if (is.element("shape", inputs)==TRUE) {
+            w_XShape <- which(Shape$id == indiv)
+            Shape_courant <- list(
+              type = "shape", X = Shape$X[, , w_XShape, , drop = FALSE],
+              id = Shape$id[w_XShape])
           }
 
-          if (is.element("image",inputs)==TRUE){
-            w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+          if (is.element("image", inputs) == TRUE) {
+            w_XImage <- which(Image$id == indiv)
+            Image_courant <- list(
+              type = "image", X = Image$X[w_XImage, , , drop = FALSE],
+              id = Image$id[w_XImage])
           }
 
-          res <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,
-                          Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          res <- pred.FT(
+            tree, Curve = Curve_courant, Scalar = Scalar_courant,
+            Factor = Factor_courant, Shape = Shape_courant,
+            Image = Image_courant, timeScale = timeScale, ...)
         }
       }
 
@@ -174,7 +187,8 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
       cl <- parallel::makeCluster(ncores)
       doParallel::registerDoParallel(cl)
 
-      pred_courant <- foreach::foreach(t = 1:ntree,.packages = "kmlShape" ,.combine = "rbind") %dopar% {
+      pred_courant <- foreach::foreach(
+        t = 1:ntree, .packages = "kmlShape", .combine = "rbind") %dopar% {
 
         tree = get(load(trees[t]))
         BOOT <- tree$boot
@@ -182,33 +196,46 @@ OOB.server <- function(Curve=NULL, Scalar=NULL, Factor=NULL, Shape=NULL, Image=N
 
         if (is.element(indiv, oob)== TRUE){
 
-          if (is.element("curve",inputs)==TRUE){
-            w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+          if (is.element("curve", inputs) == TRUE) {
+            w_XCurve <- which(Curve$id == indiv)
+            Curve_courant <- list(
+              type = "curve", X = Curve$X[w_XCurve, , drop = FALSE],
+              id = Curve$id[w_XCurve], time = Curve$time[w_XCurve]
+              )
           }
 
-          if (is.element("scalar",inputs)==TRUE){
-            w_XScalar <- which(Scalar$id== indiv)
-            Scalar_courant <- list(type="scalar", X=Scalar$X[w_XScalar,, drop=FALSE], id=Scalar$id[w_XScalar])
+          if (is.element("scalar", inputs) == TRUE) {
+            w_XScalar <- which(Scalar$id == indiv)
+            Scalar_courant <- list(
+              type = "scalar", X = Scalar$X[w_XScalar, , drop = FALSE],
+              id = Scalar$id[w_XScalar])
           }
 
-          if (is.element("factor",inputs)==TRUE){
-            w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+          if (is.element("factor", inputs) == TRUE) {
+            w_XFactor <- which(Factor$id == indiv)
+            Factor_courant <- list(
+              type = "factor", X = Factor$X[w_XFactor, , drop = FALSE],
+              id = Factor$id[w_XFactor])
           }
 
-          if (is.element("shape",inputs)==TRUE){
-            w_XShape <- which(Shape$id== indiv)
-            Shape_courant <- list(type="shape", X=Shape$X[,,w_XShape,, drop=FALSE], id=Shape$id[w_XShape])
+          if (is.element("shape", inputs) == TRUE) {
+            w_XShape <- which(Shape$id == indiv)
+            Shape_courant <- list(
+              type = "shape", X = Shape$X[, , w_XShape, , drop = FALSE],
+              id = Shape$id[w_XShape])
           }
 
-          if (is.element("image",inputs)==TRUE){
-            w_XImage <- which(Image$id== indiv)
-            Image_courant <- list(type="image", X=Image$X[w_XImage,,, drop=FALSE], id=Image$id[w_XImage])
+          if (is.element("image", inputs) == TRUE) {
+            w_XImage <- which(Image$id == indiv)
+            Image_courant <- list(
+              type = "image", X = Image$X[w_XImage, , , drop = FALSE],
+              id = Image$id[w_XImage])
           }
 
-          pred <- pred.FT(tree,Curve=Curve_courant,Scalar=Scalar_courant,Factor=Factor_courant,
-                         Shape=Shape_courant,Image=Image_courant, timeScale = d_out, ...)
+          pred <- pred.FT(
+            tree, Curve = Curve_courant, Scalar = Scalar_courant,
+            Factor = Factor_courant, Shape = Shape_courant,
+            Image = Image_courant, timeScale = timeScale, ...)
 
           res = tree$Y_pred[[pred]]
         }

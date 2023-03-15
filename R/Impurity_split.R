@@ -1,8 +1,8 @@
 #' Impurity Split
 #'
-#' @param Y
 #' @param split
-#' @param timeScale
+#'
+#' @inheritParams FrechForest
 #'
 #' @keywords internal
 impurity_split <- function(Y,split,timeScale=0.1, ...){

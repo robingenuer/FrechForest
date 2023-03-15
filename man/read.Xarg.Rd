@@ -7,7 +7,7 @@
 read.Xarg(z)
 }
 \arguments{
-\item{z}{}
+\item{z}{Vector of input names data}
 }
 \description{
 Read the parameters of the function

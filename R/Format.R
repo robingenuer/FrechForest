@@ -1,6 +1,6 @@
 #' Read the parameters of the function
 #'
-#' @param z
+#' @param z Vector of input names data
 #'
 #'
 #' @keywords internal
@@ -20,8 +20,8 @@ read.Xarg <- function(z){
 #'
 #' This function is used to find all the unique partitions of k factors into 2 groups
 #'
-#' @param Factor
-#' @param id
+#' @param Factor Input Factor data
+#' @param id Identifiers vector
 #'
 #' @keywords internal
 Fact.partitions <- function(Factor, id){
@@ -44,9 +44,9 @@ Fact.partitions <- function(Factor, id){
 
 #' Ordonne
 #'
-#' @param X
-#' @param time
-#' @param id
+#' @param X Input
+#' @param time Time values
+#' @param id Identifiers vector
 #'
 #'
 #' @keywords internal

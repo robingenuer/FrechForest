@@ -1,7 +1,7 @@
 #' Title
 #'
-#' @param Courbes
-#' @param id
+#' @param Courbes Input Curves to be permuted
+#' @param id Identifiers of individuals
 #'
 #' @keywords internal
 permutation_courbes <- function(Courbes,id){
@@ -16,8 +16,8 @@ permutation_courbes <- function(Courbes,id){
 
 #' Title
 #'
-#' @param Shapes
-#' @param id
+#' @param Shapes Input Shapes to be permuted
+#' @param id Identifiers of individuals
 #'
 #' @keywords internal
 permutation_shapes <- function(Shapes, id){

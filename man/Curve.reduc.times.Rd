@@ -7,7 +7,11 @@
 Curve.reduc.times(time.init, traj.init, time.new)
 }
 \arguments{
-\item{time.new}{}
+\item{time.init}{Initial time values of the trajectory}
+
+\item{traj.init}{Initial trajectory values}
+
+\item{time.new}{New times values for the output trajectory}
 }
 \description{
 Title

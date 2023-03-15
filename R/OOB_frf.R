@@ -1,14 +1,7 @@
 #' OOB for random Forest
 #'
-#' @param rf
-#' @param Curve
-#' @param Scalar
-#' @param Factor
-#' @param Shape
-#' @param Image
-#' @param Y
-#' @param timeScale
-#' @param d_out
+#' @param rf A forest resulting from \code{rf_shape_para()} function
+#' @inheritParams FrechForest
 #'
 #' @keywords internal
 OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
@@ -19,7 +12,7 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   doParallel::registerDoParallel(cl)
 
   ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
-  inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
+  inputs <- read.Xarg(c(Curve, Scalar, Factor, Shape, Image))
   Inputs <- inputs
 
   for (k in 1:length(Inputs)){
@@ -85,7 +78,7 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
           pred <- pred.FT(
             rf$rf[, t], Curve = Curve_courant, Scalar = Scalar_courant,
             Factor = Factor_courant, Shape = Shape_courant,
-            Image = Image_courant, timeScale = d_out, ...)
+            Image = Image_courant, timeScale = timeScale, ...)
           courbe <- rf$rf[, t]$Y_pred[[pred]]
         }
         res <- cbind(rep(t, dim(courbe)[1]), courbe)
@@ -150,7 +143,7 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
           pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
                           Factor=Factor_courant,Shape=Shape_courant,
-                          Image=Image_courant, timeScale = d_out, ...)
+                          Image=Image_courant, timeScale = timeScale, ...)
         }
         return(pred)
       }, cl = cl)
@@ -206,11 +199,11 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
           pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
                           Factor=Factor_courant,Shape=Shape_courant,
-                          Image=Image_courant, timeScale = d_out, ...)
+                          Image=Image_courant, timeScale = timeScale, ...)
           pred_courant[t] <- pred
         }
       }
-      pred_courant <- na.omit(pred_courant)
+      pred_courant <- stats::na.omit(pred_courant)
       oob.pred[i] <- as.factor(attributes(which.max(table(pred_courant))))
     }
     err <- 1*(oob.pred!=Y$Y)
@@ -268,7 +261,7 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
           pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
                           Factor=Factor_courant,Shape=Shape_courant,
-                          Image=Image_courant, timeScale = d_out, ...)
+                          Image=Image_courant, timeScale = timeScale, ...)
           pred_courant[,,t] <- rf$rf[,t]$Y_pred[[pred]]
         }
       }
@@ -334,11 +327,11 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
           pred <- pred.FT(rf$rf[,t],Curve=Curve_courant,Scalar=Scalar_courant,
                           Factor=Factor_courant,Shape=Shape_courant,
-                          Image=Image_courant, timeScale = d_out, ...)
+                          Image=Image_courant, timeScale = timeScale, ...)
           pred_courant[t,] <- rf$rf[,t]$Y_pred[[pred]]
         }
       }
-      oob.pred[i,] <-  apply(na.omit(pred_courant),2,"mean")
+      oob.pred[i,] <-  apply(stats::na.omit(pred_courant),2,"mean")
       err[i,] <- (oob.pred[i,]-Y$Y[w_y,])^2
     }
   }

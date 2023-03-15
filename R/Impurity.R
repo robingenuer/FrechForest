@@ -2,9 +2,7 @@
 #'
 #' Compute the impurity of a given vector
 #'
-#' @param Y
-#' @param timeScale
-#' @param FrechetSumOrMax
+#' @inheritParams FrechForest
 #'
 #' @keywords internal
 impurity <- function(Y, timeScale = 0.1, FrechetSumOrMax = "max", ...){
@@ -13,9 +11,9 @@ impurity <- function(Y, timeScale = 0.1, FrechetSumOrMax = "max", ...){
     trajLong <- data.frame(id = Y$id, time = Y$time, traj = Y$Y)
     meanF <- meanFrechet(trajLong = trajLong, timeScale = timeScale,
                          FrechetSumOrMax = FrechetSumOrMax, ...)
-    allDistF <- sapply(unique(id), FUN = function(i) {
+    allDistF <- sapply(unique(Y$id), FUN = function(i) {
       distF <- distFrechet(
-        meanF$times, meanF$traj, Y$time[which(id == i)], Y$Y[which(id == i)],
+        meanF$times, meanF$traj, Y$time[which(Y$id == i)], Y$Y[which(Y$id == i)],
         timeScale = timeScale, FrechetSumOrMax = FrechetSumOrMax)^2
       return(distF)
     })
@@ -26,14 +24,14 @@ impurity <- function(Y, timeScale = 0.1, FrechetSumOrMax = "max", ...){
     if (length(Y$id) == 1){
       imp <- 0
     }
-    imp <- mean(apply(Y$Y,2,"var"))
+    imp <- mean(apply(Y$Y,2,stats::var))
   }
 
   if (Y$type == "scalar"){
     if (length(Y$Y) == 1){
       imp <- 0
     }
-    imp <- var(Y$Y)
+    imp <- stats::var(Y$Y)
   }
 
   if (Y$type == "factor"){

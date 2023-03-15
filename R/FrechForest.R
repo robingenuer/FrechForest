@@ -87,6 +87,7 @@
 #' @import parallel
 #' @import pbapply
 #' @import stringr
+#' @import stats
 #'
 #' @export
 #'

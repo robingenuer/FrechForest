@@ -1,17 +1,11 @@
 #' Optimized Importance variable calculation for servers
 #'
 #' @param Trees [string]:
-#' @param Curve [list]:
-#' @param Scalar [list]:
-#' @param Factor [list]:
-#' @param Shape [list]:
-#' @param Image [list]:
-#' @param Y [list]:
 #' @param type [string]:
 #' @param range [vector]:
-#' @param ncores [numeric]:
-#' @param timeScale [numeric]:
 #' @param xerror [vector]
+#'
+#' @inheritParams FrechForest
 #'
 #' @keywords internal
 #'

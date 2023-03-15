@@ -7,7 +7,9 @@
 permutation_courbes(Courbes, id)
 }
 \arguments{
-\item{id}{}
+\item{Courbes}{Input Curves to be permuted}
+
+\item{id}{Identifiers of individuals}
 }
 \description{
 Title

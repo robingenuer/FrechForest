@@ -1,7 +1,7 @@
 #' Sub trees  extractor
 #'
-#' @param tree
-#' @param t
+#' @param tree Input tree
+#' @param t Node
 #'
 #'
 #' @keywords internal
@@ -98,7 +98,7 @@ branche <- function(tree, t){
 
 #' Detect and destroy nodes
 #'
-#' @param tree
+#' @param tree Input tree
 #'
 #'
 #' @keywords internal
