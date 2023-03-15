@@ -153,8 +153,7 @@ FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
 
   if (Y$type=="shape" || Y$type=="image"){
     rf <- list(type=Y$type, rf=rf, size = dim(Y$Y))
-  }
-  else {
+  } else {
     rf <- list(type=Y$type, rf=rf, levels=levels(Y$Y))
   }
 
@@ -175,8 +174,6 @@ FrechForest <- function(Curve = NULL, Scalar = NULL, Factor = NULL,
   computTimeFRF <- Sys.time() - startFRF
 
   if (importance == TRUE) {
-
-    print("Computing permutation-based variable importance")
 
     imp <- Importance(rf = rf, Curve = Curve, Scalar = Scalar,
       Factor = Factor, Shape = Shape, Image = Image, Y = Y, ncores = ncores,

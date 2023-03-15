@@ -13,6 +13,8 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   cl <- parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl)
 
+  print("Computing the OOB error of each tree")
+
   oobTrees <- pbsapply(1:ntree, FUN = function(numTree){
     OOB.tree(rf$rf[, numTree], Curve = Curve, Scalar = Scalar,
              Factor = Factor, Shape = Shape, Image = Image, Y = Y,
@@ -32,11 +34,10 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   Importance.Image <- NULL
 
   if (is.element("curve", inputs) == TRUE) {
-    print('Computing the importance on the space of curves')
+    print('Computing the importance for curves input variables')
     Curve.err <- matrix(NA, ntree, dim(Curve$X)[2])
 
-    Importance.Curve <- foreach::foreach(
-      p = 1:dim(Curve$X)[2], .packages = "kmlShape", .combine = "c") %dopar% {
+    Importance.Curve <- pbsapply(1:dim(Curve$X)[2], FUN = function(p) {
       for (k in 1:ntree) {
         BOOT <- rf$rf[, k]$boot
         nboot <- length(unique(Y$id)) - length(BOOT)
@@ -56,8 +57,8 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
         Curve.perm$X[, p] <- Curve$X[, p]
       }
-      res <- mean(Curve.err[, p] - oobTrees)
-    }
+      return(mean(Curve.err[, p] - oobTrees))
+    }, cl = cl)
   }
 
   if (is.element("scalar",inputs)==TRUE){
