@@ -8,18 +8,21 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   Shape = NULL, Image = NULL, Y, timeScale = 0.1, d_out = 0.1,
   FrechetSumOrMax = "max", ncores, ...){
 
-  cl <- parallel::makeCluster(ncores)
-  doParallel::registerDoParallel(cl)
+  if (.Platform$OS.type == "windows") {
+    cl <- parallel::makeCluster(ncores)
+    doParallel::registerDoParallel(cl)
+  } else {
+    cl <- ncores
+  }
 
-  ### Pour optimiser le code il faudra virer cette ligne et ne le calculer qu'une seule fois !
+  ### Pour optimiser le code il faudra virer cette ligne et ne le calculer
+  # qu'une seule fois !
   inputs <- read.Xarg(c(Curve, Scalar, Factor, Shape, Image))
   Inputs <- inputs
 
   for (k in 1:length(Inputs)){
     str_sub(Inputs[k],1,1) <- str_to_upper(str_sub(Inputs[k],1,1))
   }
-
-  err <- rep(NA,length(unique(Y$id)))
 
   Curve_courant <- NULL
   Scalar_courant <- NULL
@@ -28,17 +31,17 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   Image_courant <- NULL
 
   if (Y$type=="curve"){
-    oob.pred <- list()
 
-    for (i in 1:length(unique(Y$id))) {
+    oobInfo <- pblapply(1:length(unique(Y$id)), FUN = function(i) {
+
       indiv <- unique(Y$id)[i]
       w_y <- which(Y$id == indiv)
 
-      pred_courant <- foreach::foreach(
-        t = 1:ncol(rf$rf), .packages = "kmlShape", .combine = "rbind") %dopar% {
+      pred_courant <- lapply(1:ncol(rf$rf), FUN = function(t) {
 
           BOOT <- rf$rf[, t]$boot
           oob <- setdiff(unique(Y$id),BOOT)
+          res <- NULL
           if (is.element(indiv, oob) == TRUE){
 
             if (is.element("curve",inputs) == TRUE){
@@ -84,21 +87,24 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
             courbe <- rf$rf[, t]$Y_pred[[pred]]
 
             res <- cbind(rep(t, dim(courbe)[1]), courbe)
-          } else {
-            res <- NULL
           }
-        }
+          return(res)
+        })
+      pred_courant <- do.call(rbind, pred_courant)
 
       mean_pred <- meanFrechet(pred_courant, timeScale = d_out, ...)
       dp <- as.data.frame(
         Curve.reduc.times(mean_pred$times, mean_pred$traj, Y$time[w_y]))
       names(dp) <- c("x","y")
-      oob.pred[[i]] <- dp
-      err[i] <- distFrechet(
+      oobPred <- dp
+      oobErr <- distFrechet(
         dp$x, dp$y, Y$time[w_y], Y$Y[w_y], timeScale = d_out,
         FrechetSumOrMax = FrechetSumOrMax)^2
-    }
+      return(list(oobPred, oobErr))
+    }, cl = cl)
+    oob.pred <- lapply(oobInfo, "[[", 1)
     names(oob.pred) <- as.numeric(unique(Y$id))
+    err <- sapply(oobInfo, "[[", 2)
   }
 
   if (Y$type=="scalar"){
@@ -115,7 +121,9 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
           if (is.element("curve",inputs)==TRUE){
             w_XCurve <- which(Curve$id== indiv)
-            Curve_courant <- list(type="curve", X=Curve$X[w_XCurve,, drop=FALSE], id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
+            Curve_courant <- list(
+              type="curve", X=Curve$X[w_XCurve,, drop=FALSE],
+              id=Curve$id[w_XCurve], time=Curve$time[w_XCurve])
           }
 
           if (is.element("scalar",inputs)==TRUE){
@@ -185,7 +193,9 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
 
           if (is.element("factor",inputs)==TRUE){
             w_XFactor <- which(Factor$id== indiv)
-            Factor_courant <- list(type="factor", X=Factor$X[w_XFactor,, drop=FALSE], id=Factor$id[w_XFactor])
+            Factor_courant <- list(
+              type="factor", X=Factor$X[w_XFactor,, drop=FALSE],
+              id=Factor$id[w_XFactor])
           }
 
           if (is.element("shape",inputs)==TRUE){
@@ -341,6 +351,7 @@ OOB.rfshape <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
     }
   }
 
-  parallel::stopCluster(cl)
+  if (.Platform$OS.type == "windows") parallel::stopCluster(cl)
+
   return(list(err=err,oob.pred=oob.pred))
 }

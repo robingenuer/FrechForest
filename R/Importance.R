@@ -10,8 +10,12 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
   ntree <- ncol(rf$rf)
   inputs <- read.Xarg(c(Curve,Scalar,Factor,Shape,Image))
 
-  cl <- parallel::makeCluster(ncores)
-  doParallel::registerDoParallel(cl)
+  if (.Platform$OS.type == "windows") {
+    cl <- parallel::makeCluster(ncores)
+    doParallel::registerDoParallel(cl)
+  } else {
+    cl <- ncores
+  }
 
   print("Computing the OOB error of each tree")
 
@@ -197,7 +201,7 @@ Importance <- function(rf, Curve = NULL, Scalar = NULL, Factor = NULL,
       }
   }
 
-  parallel::stopCluster(cl)
+  if (.Platform$OS.type == "windows") parallel::stopCluster(cl)
 
   varImp <- list(
     Curve = as.vector(Importance.Curve),

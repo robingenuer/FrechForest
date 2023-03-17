@@ -50,13 +50,14 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1,
   Factor.val <- NULL
   Curve.val <- NULL
 
-  cl <- parallel::makeCluster(ncores)
-  doParallel::registerDoParallel(cl)
-  #p=1
-  #err <- foreach(p = 1:n_folds, .packages='kmlShape', .combine="cbind") %dopar% {
+  if (.Platform$OS.type == "windows") {
+    cl <- parallel::makeCluster(ncores)
+    doParallel::registerDoParallel(cl)
+  } else {
+    cl <- ncores
+  }
 
   err <- pbsapply(1:n_folds, FUN=function(i){
-
 
     res <- rep(NA,length(beta))
     app <- unique(Y$id)[which(VC!=i)] ### on r?cup?re les identifiants
@@ -144,7 +145,7 @@ FrechetTree <- function(Curve=NULL,Scalar=NULL,Factor=NULL,Y,timeScale=0.1,
     res
   },cl=cl)
 
-  parallel::stopCluster(cl)
+  if (.Platform$OS.type == "windows") parallel::stopCluster(cl)
 
   SD <- apply(err, 1, "sd")
   err_M <- apply(err, 1, "mean")
